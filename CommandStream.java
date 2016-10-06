@@ -35,21 +35,8 @@ public class CommandStream implements ActionListener {
 			output.setText("");
 			input.setText("");
 		} else if(command.equals("cd")) {
-			//System.out.println("DEBUG: command is " + command);
-			if(scan.hasNext()) {
-				String location = scan.next();
-				//System.out.println("DEBUG: input has next, and it's " + location);
-					if(location.equals("..")) {
-						if(currentDirectory.getParent() != null) {
-							currentDirectory = currentDirectory.getParent();
-						}  //end root check
-						
-						output.append("Current working directory is now " + currentDirectory.name() + "\n");
-						input.setText("");
-					} //else check directory path
-			}  //end cd check
+			cd(input, output, scan);
 		} else if(command.equals("cat")) {
-			System.out.println(scan.hasNext());
 			if(scan.hasNext()) {
 				cat(scan.next(), currentDirectory, output);
 			} else {
@@ -74,7 +61,7 @@ public class CommandStream implements ActionListener {
 		output.append(input.getText() + "\n");
 		input.setText("");
 	}
-	
+
 	public void ls(JTextField input, JTextArea output) {
 		for(Directory dir : currentDirectory.getSubDirs()) {
 			output.append(dir.name() + "\n");
@@ -82,9 +69,38 @@ public class CommandStream implements ActionListener {
 		for(File file : currentDirectory.getFiles()) {
 			output.append(file.getName() + "\n");
 		}
-		//output.append(input.getText() + "\n");
 		input.setText("");
 	}
+	
+	public void cd(JTextField input, JTextArea output, Scanner scan) {
+		//first check: does cd have an argument?
+		if(scan.hasNext()) {
+			String location = scan.next();
+			
+			//second check: is the cd argument ..?
+			if(location.equals("..")) {
+				if(currentDirectory.getParent() != null) {
+					currentDirectory = currentDirectory.getParent();
+				}
+				
+				input.setText("");
+				output.append("Current working directory is now " + currentDirectory.name() + "\n");
+			} else {
+				//third check: is the directory in the argument a valid subdirectory?
+				for(Directory dir : currentDirectory.getSubDirs()) {
+					if(dir.name().equals(location)) {
+						currentDirectory = dir;
+						input.setText("");
+						output.append("Current working directory is now " + currentDirectory.name() + "\n");
+						return;
+					}  //end if
+				}  //end for
+				output.append("Directory \"" + location + "\" not found.");
+			}  //end else
+		} else {
+			output.append("Invalid parameters." + "\n");
+		}  //end scan.hasNext check
+	}  //end method
 	
 	public void invalid(JTextField input, JTextArea output) {
 		output.append(input.getText() + " is not a valid command.\n");
@@ -96,6 +112,7 @@ public class CommandStream implements ActionListener {
 			output.append("No such file.\n");
 			return;
 		}
+		input.setText("");
 		output.append(file.getContents() + "\n");
 	}
 	
@@ -104,6 +121,7 @@ public class CommandStream implements ActionListener {
 	}
 	//-----------------------------------------------------
 	
+	//finds a file by name in the current working directory or null if no such file exists
 	public File findFile(String name, Directory currentDirectory) {
 		//File ret = new File("", "");
 		for(File f : currentDirectory.getFiles()) {

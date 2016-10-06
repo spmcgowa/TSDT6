@@ -46,6 +46,10 @@ public class Parser {
 		input.addActionListener(cs);
 	}
 	
+	/**
+	 * This method constructs the basic file structure of a simulated linux system
+	 * @return a reference to the root directory
+	 */
 	private Directory makeFileStructure() {
 		Directory root = new Directory("root", null, new ArrayList<Directory>(), new ArrayList<File>());
 		Directory username = new Directory("username", root, new ArrayList<Directory>(), new ArrayList<File>());

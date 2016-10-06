@@ -1,8 +1,8 @@
 
 public class File {
 
-	protected final String name;
-	protected final String contents;
+	protected String name;
+	protected String contents;
 	
 	public File(String name, String contents) {
 		this.name = name;

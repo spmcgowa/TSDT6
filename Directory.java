@@ -3,7 +3,7 @@ import java.util.ArrayList;
 public class Directory {
 	
 	public String name;
-	protected final Directory parent;
+	protected Directory parent;
 	protected ArrayList<Directory> subDirectories;
 	protected ArrayList<File> files;
 	
