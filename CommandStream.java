@@ -1,5 +1,8 @@
+import java.awt.Color;
 import java.awt.event.*;
+
 import javax.swing.*;
+
 import java.util.Scanner;
 
 public class CommandStream implements ActionListener {
@@ -63,12 +66,17 @@ public class CommandStream implements ActionListener {
 	}
 
 	public void ls(JTextField input, JTextArea output) {
+		output.setForeground(Color.BLUE);
 		for(Directory dir : currentDirectory.getSubDirs()) {
 			output.append(dir.name() + "\n");
 		}
+		
+		output.setForeground(Color.GREEN);
 		for(File file : currentDirectory.getFiles()) {
 			output.append(file.getName() + "\n");
 		}
+		
+		output.setForeground(Color.WHITE);
 		input.setText("");
 	}
 	
@@ -95,7 +103,7 @@ public class CommandStream implements ActionListener {
 						return;
 					}  //end if
 				}  //end for
-				output.append("Directory \"" + location + "\" not found.");
+				output.append("Directory \"" + location + "\" not found.\n");
 			}  //end else
 		} else {
 			output.append("Invalid parameters." + "\n");
