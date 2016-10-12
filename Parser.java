@@ -14,11 +14,18 @@ public class Parser {
 		
 		JPanel graphicsPanel = new JPanel();
 		graphicsPanel.setPreferredSize(new Dimension(735, 400));
+		
 		JPanel terminal = new JPanel();
+		
+		/*
+		JLabel prompt = new JLabel();
+		prompt.setBackground(Color.BLACK);
+		prompt.setForeground(Color.WHITE);
+		prompt.setText(">");
+		*/
 		
 		//this is the input box
 		JTextField input = new JTextField(42);
-		//input.setBorder(javax.swing.BorderFactory.createEmptyBorder());
 		
 		//this is the output field
 		JTextArea output = new JTextArea(32, 42);
@@ -32,10 +39,12 @@ public class Parser {
 		
 		//jpanel is necessary to align elements properly
 		JPanel grid = new JPanel();
+		
 		//boxlayout contains the input and output elements and aligns them appropriately
 		grid.setLayout(new BoxLayout(grid, BoxLayout.Y_AXIS));
 		
 		terminal.setLayout(new BoxLayout(terminal, BoxLayout.Y_AXIS));
+		//terminal.add(prompt, BorderLayout.NORTH);
 		terminal.add(input, BorderLayout.NORTH);
 		terminal.add(output, BorderLayout.SOUTH);
 		
@@ -54,7 +63,7 @@ public class Parser {
 
 		//this sets up a listener and adds it to the input box, allowing for the input
 		//to be processed when the user presses [ENTER]
-		CommandStream cs = new CommandStream(input, output, root);
+		CommandStream cs = new CommandStream(input, output, root, root);
 		input.addActionListener(cs);
 	}
 	

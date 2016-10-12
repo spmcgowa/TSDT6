@@ -1,4 +1,3 @@
-import java.awt.Color;
 import java.awt.event.*;
 
 import javax.swing.*;
@@ -11,11 +10,13 @@ public class CommandStream implements ActionListener {
 	JTextArea output;
 	Scanner scan;
 	Directory currentDirectory;
+	final Directory root;
 	
-	public CommandStream(JTextField input, JTextArea output, Directory cd) {
+	public CommandStream(JTextField input, JTextArea output, Directory cd, Directory root) {
 		this.input = input;
 		this.output = output;
 		currentDirectory = cd;
+		this.root = root;
 	}
 	
 	public void actionPerformed(ActionEvent e) {
@@ -29,7 +30,7 @@ public class CommandStream implements ActionListener {
 		
 		//block of if statements to find the command the user entered
 		if(command.equals("mv")) {
-			mv(input, output);
+			mv(input, output, scan, root);
 		} else if(command.equals("ls")) {
 			ls(input, output);
 		} else if(command.equals("exit")) {
@@ -60,23 +61,87 @@ public class CommandStream implements ActionListener {
 	
 	//these methods execute the proper command based on the command identified above in the ifs block
 	//-----------------------------------------------------
-	public void mv(JTextField input, JTextArea output) {
-		output.append(input.getText() + "\n");
+	public void mv(JTextField input, JTextArea output, Scanner scan, Directory root) {
+		
+		String name = null;
+		String path = null;
+		
+		//checking file parameter
+		if(scan.hasNext()) {
+			name = scan.next();
+		} else {
+			output.append("Missing filename parameter.\n");
+			return;
+		}
+		
+		//locating specified file
+		File file = findFile(name, currentDirectory);
+		
+		//checking for existence of specified file
+		if(file == null) {
+			output.append("File " + name + " not found.\n");
+			return;
+		}
+		
+		
+		//checking for filepath destination parameter
+		if(scan.hasNext()) {
+			path = scan.next();
+		} else {
+			output.append("Missing parameter\n");
+			return;
+		}
+		
+		//deleting file from current location (file still exists)
+		currentDirectory.delFile(file);
+		
+		//delimiting filepath by /
+		String[] filePath = path.split("/");
+		
+		
+		//setting the destination to start as root
+		Directory destination = root;
+		
+		boolean problem = false;
+		
+		//for each directory specified, e.g. /root/username/, iterate
+		for(int i = 1; i < filePath.length; i++) {
+			if(filePath[i].equals("") || filePath[i].equals("root")) {
+				continue;
+			}
+			
+			//check each directory in the current directory for the next specified directory
+			for(Directory dir : destination.getSubDirs()) {
+				
+				//check validity of current dir
+				if(filePath[i].equals(dir.name())) {
+					destination = dir;
+					problem = false;
+					break;
+				} else {
+					problem = true;
+				}
+			}  //next dir
+			
+			if(problem) {
+				output.append("Bad filepath.\n");
+				currentDirectory.addFile(file);
+				return;
+			}
+			
+		}  //next i
+		destination.addFile(file);
+		output.append("File " + file.getName() + " successfully moved.\n");
 		input.setText("");
 	}
 
 	public void ls(JTextField input, JTextArea output) {
-		output.setForeground(Color.BLUE);
 		for(Directory dir : currentDirectory.getSubDirs()) {
 			output.append(dir.name() + "\n");
 		}
-		
-		output.setForeground(Color.GREEN);
 		for(File file : currentDirectory.getFiles()) {
 			output.append(file.getName() + "\n");
 		}
-		
-		output.setForeground(Color.WHITE);
 		input.setText("");
 	}
 	

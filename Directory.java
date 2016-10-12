@@ -42,4 +42,8 @@ public class Directory {
 		files.add(fil);
 	}
 	
+	public void delFile(File file) {
+		files.remove(file);
+	}
+	
 }
