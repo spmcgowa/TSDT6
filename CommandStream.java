@@ -46,6 +46,8 @@ public class CommandStream implements ActionListener {
 			} else {
 				invalid(input, output);
 			}
+		} else if(command.equals("pwd")) {
+			pwd(output, currentDirectory);
 		} else if(command.equals("chmod")) {
 			
 		} else if(command.equals("ssh")) {
@@ -74,7 +76,7 @@ public class CommandStream implements ActionListener {
 			return;
 		}
 		
-		//locating specified file
+		//locating specified file (could be null if no such file)
 		File file = findFile(name, currentDirectory);
 		
 		//checking for existence of specified file
@@ -91,42 +93,51 @@ public class CommandStream implements ActionListener {
 			return;
 		}
 		
-		//deleting file from current location (file still exists)
+		//deleting file from current location (file still exists because of "file" variable)
 		currentDirectory.delFile(file);
 		
 		String[] filePath = path.split("/");
 		
+		//locate final directory destination
 		Directory destination = validateFilePath(filePath);
 		
+		//check for a valid destination; if not, add the file back to the current directory
 		if(destination == null) {
 			output.append("Invalid file path!\n");
 			currentDirectory.addFile(file);
 			return;
 		}
 		
-		
-		//---------------------------------
-		//UNTESTED SECTION!!
+		//mv can be used to rename, this takes care of that
 		String newFileName = filePath[filePath.length - 1];
 		
+		//this for-each loop looks for a directory with the same name as the file and overwrites it with the file if so,
+		//just like actual Linux
 		for(Directory d : destination.getSubDirs()) {
 			if(d.name().equals(newFileName)) {
-				Directory newDestination = destination.getParent();
-				newDestination.remDir(destination);
+				destination.remDir(d);
 				break;
 			}
 		}
-		//----------------------------------
 		
-		/*
-		if(destination.name().equals(file.getName())) {
-			Directory newDest = destination.getParent();
-			newDest.remDir(destination);
-		}
-		*/
-		
+		//this updates the file's name and adds it to the appropriate directory
 		file.setName(filePath[filePath.length - 1]);
 		destination.addFile(file);
+		
+		input.setText("");
+	}
+	
+	public void pwd(JTextArea output, Directory currentDirectory) {
+		String path = "";
+		
+		//first use of a do-while loop, I'm so proud!
+		do {
+			path = "/" + currentDirectory.name() + path;
+			currentDirectory = currentDirectory.getParent();
+		} while(currentDirectory != null);
+		
+		output.append(path + "\n");
+		input.setText("");
 	}
 
 	public void ls(JTextField input, JTextArea output) {
@@ -202,13 +213,18 @@ public class CommandStream implements ActionListener {
 	public Directory validateFilePath(String[] path) {
 		boolean thereIsAProblem = false;
 		
+		//start at the root
 		Directory dir = root;
 		
+		//this loop checks each directory name specified in the path argument
 		for(int i = 0; i < path.length  - 1; i++) {
+			//and ignores the /root part, starting with a subdirectory of root
 			if(path[i].equals("") || path[i].equals(root.name())) {
 				continue;
 			}  //end if
 			
+			//yes, this has a terrible big-oh runtime, but it works; this checks each
+			//subdirectory all the way down to make sure the given path is valid
 			for(Directory d : dir.getSubDirs()) {
 				if(d.name().equals(path[i])) {
 					dir = d;
@@ -219,6 +235,7 @@ public class CommandStream implements ActionListener {
 				}  //end if
 			}  //next d
 			
+			//if there is a problem (i.e. /root/badDir/username, where badDir doesn't exist) return null for no directory found
 			if(thereIsAProblem) {
 				return null;
 			}
