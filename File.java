@@ -9,6 +9,14 @@ public class File {
 		this.contents = contents;
 	}
 	
+	public void setName(String newName) {
+		name = newName;
+	}
+	
+	public void writeContents(String newContents) {
+		contents = newContents;
+	}
+	
 	public String getName() {
 		return name;
 	}

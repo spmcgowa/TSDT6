@@ -38,6 +38,10 @@ public class Directory {
 		subDirectories.add(dir);
 	}
 	
+	public void remDir(Directory dir) {
+		subDirectories.remove(dir);
+	}
+	
 	public void addFile(File fil) {
 		files.add(fil);
 	}

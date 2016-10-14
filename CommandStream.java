@@ -83,7 +83,6 @@ public class CommandStream implements ActionListener {
 			return;
 		}
 		
-		
 		//checking for filepath destination parameter
 		if(scan.hasNext()) {
 			path = scan.next();
@@ -95,44 +94,39 @@ public class CommandStream implements ActionListener {
 		//deleting file from current location (file still exists)
 		currentDirectory.delFile(file);
 		
-		//delimiting filepath by /
 		String[] filePath = path.split("/");
 		
+		Directory destination = validateFilePath(filePath);
 		
-		//setting the destination to start as root
-		Directory destination = root;
+		if(destination == null) {
+			output.append("Invalid file path!\n");
+			currentDirectory.addFile(file);
+			return;
+		}
 		
-		boolean problem = false;
 		
-		//for each directory specified, e.g. /root/username/, iterate
-		for(int i = 1; i < filePath.length; i++) {
-			if(filePath[i].equals("") || filePath[i].equals("root")) {
-				continue;
+		//---------------------------------
+		//UNTESTED SECTION!!
+		String newFileName = filePath[filePath.length - 1];
+		
+		for(Directory d : destination.getSubDirs()) {
+			if(d.name().equals(newFileName)) {
+				Directory newDestination = destination.getParent();
+				newDestination.remDir(destination);
+				break;
 			}
-			
-			//check each directory in the current directory for the next specified directory
-			for(Directory dir : destination.getSubDirs()) {
-				
-				//check validity of current dir
-				if(filePath[i].equals(dir.name())) {
-					destination = dir;
-					problem = false;
-					break;
-				} else {
-					problem = true;
-				}
-			}  //next dir
-			
-			if(problem) {
-				output.append("Bad filepath.\n");
-				currentDirectory.addFile(file);
-				return;
-			}
-			
-		}  //next i
+		}
+		//----------------------------------
+		
+		/*
+		if(destination.name().equals(file.getName())) {
+			Directory newDest = destination.getParent();
+			newDest.remDir(destination);
+		}
+		*/
+		
+		file.setName(filePath[filePath.length - 1]);
 		destination.addFile(file);
-		output.append("File " + file.getName() + " successfully moved.\n");
-		input.setText("");
 	}
 
 	public void ls(JTextField input, JTextArea output) {
@@ -203,6 +197,35 @@ public class CommandStream implements ActionListener {
 			}
 		}
 		return null;
+	}
+	
+	public Directory validateFilePath(String[] path) {
+		boolean thereIsAProblem = false;
+		
+		Directory dir = root;
+		
+		for(int i = 0; i < path.length  - 1; i++) {
+			if(path[i].equals("") || path[i].equals(root.name())) {
+				continue;
+			}  //end if
+			
+			for(Directory d : dir.getSubDirs()) {
+				if(d.name().equals(path[i])) {
+					dir = d;
+					thereIsAProblem = false;
+					break;
+				} else {
+					thereIsAProblem = true;
+				}  //end if
+			}  //next d
+			
+			if(thereIsAProblem) {
+				return null;
+			}
+			
+		}  //next i
+		
+		return dir;
 	}
 	
 }
