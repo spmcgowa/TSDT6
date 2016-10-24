@@ -14,9 +14,11 @@ public class CommandStream implements ActionListener {
 	File nanoFile;
 	Directory prevDir;
 	final Directory root;
+	String step = "step0";
+	Level1 lv;
 
 	public CommandStream(JTextField input, JTextArea output, Directory cd,
-			Directory root, JPanel buttons) {
+			Directory root, JPanel buttons, String lv1, JTextArea graphicsTextOutput) {
 		this.input = input;
 		this.output = output;
 		currentDirectory = cd;
@@ -24,6 +26,9 @@ public class CommandStream implements ActionListener {
 		this.buttons = buttons;
 		nanoFile = null;
 		prevDir = null;
+		lv = new Level1(step, graphicsTextOutput);
+		lv.playLevel1(step);
+		step = "step1";
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -112,10 +117,13 @@ public class CommandStream implements ActionListener {
 				return;
 			}
 
-			File f = findFile(scan.next(), currentDirectory);
+			String fileName = scan.next();
+			
+			File f = findFile(fileName, currentDirectory);
 			if (f == null) {
-				output.append("File " + f + " not found.\n");
-				return;
+				//output.append("File " + f + " not found.\n");
+				f = new File(fileName, "");
+				currentDirectory.addFile(f);
 			}
 
 			nano(input, output, buttons, f);
@@ -208,14 +216,23 @@ public class CommandStream implements ActionListener {
 			return;
 		}
 		String path[] = dest.split("/");
+		
 		Directory destination = validateFilePath(path);
 		if (destination == null) {
 			output.append("Invalid path!\n");
 			return;
 		}
-		destination.addFile(f);
+		
+		String name = f.getName();
+		
+		//filename specified
+		if(!destination.name().equals(path[path.length - 1])) {
+			name = path[path.length - 1];
+		}
+		
+		destination.addFile(new File(name, f.getContents()));
 		input.setText("");
-		output.append("File " + f.getName() + " successfully copied to "
+		output.append("File " + name + " successfully copied to "
 				+ destination.name() + "\n");
 	}
 
@@ -225,13 +242,15 @@ public class CommandStream implements ActionListener {
 		input.setEditable(false);
 		output.setEditable(true);
 		output.requestFocus();
-		// save.setVisible(true);
-		// exit.setVisible(true);
 		buttons.setVisible(true);
 		nanoFile = f;
 	}
 
 	public void pwd(JTextArea output, Directory currentDirectory) {
+		if(step.equals("step2")) {
+			lv.playLevel1(step);
+			step = "step3";
+		}
 		String path = "";
 
 		// first use of a do-while loop, I'm so proud!
@@ -245,6 +264,10 @@ public class CommandStream implements ActionListener {
 	}
 
 	public void ls(JTextField input, JTextArea output, boolean a) {
+		if(step.equals("step1")) {
+			lv.playLevel1(step);
+			step = "step2";
+		}
 		for (Directory dir : currentDirectory.getSubDirs()) {
 			output.append(dir.name() + "\n");
 		}
@@ -267,6 +290,10 @@ public class CommandStream implements ActionListener {
 
 			// second check: is the cd argument ..?
 			if (location.equals("..")) {
+				if(step.equals("step2")) {
+					lv.playLevel1(step);
+					step = "step3";
+				}
 				if (currentDirectory.getParent() != null) {
 					prevDir = currentDirectory;
 					currentDirectory = currentDirectory.getParent();
@@ -281,6 +308,7 @@ public class CommandStream implements ActionListener {
 				input.setText("");
 				output.append("Current working directory is now " + currentDirectory.name() + "\n");
 			} else if(location.equals("-")) {
+				
 				Directory temp = currentDirectory;
 				currentDirectory = prevDir;
 				prevDir = temp;
@@ -376,6 +404,9 @@ public class CommandStream implements ActionListener {
 			// if there is a problem (i.e. /root/badDir/username, where badDir
 			// doesn't exist) return null for no directory found
 			if (thereIsAProblem) {
+				if(i == path.length - 1) {
+					return dir;
+				}
 				return null;
 			}
 
