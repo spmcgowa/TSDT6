@@ -26,9 +26,11 @@ public class CommandStream implements ActionListener {
 		this.buttons = buttons;
 		nanoFile = null;
 		prevDir = null;
-		lv = new Level1(step, graphicsTextOutput);
+		ClickListener click = new ClickListener(graphicsTextOutput);
+		lv = new Level1(step, graphicsTextOutput/*, click*/);
 		lv.playLevel1(step);
 		step = "step1";
+		output.addMouseListener(click);
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -294,6 +296,10 @@ public class CommandStream implements ActionListener {
 					lv.playLevel1(step);
 					step = "step3";
 				}
+				if(step.equals("step2")) {
+					lv.playLevel1(step);
+					step = "step3";
+				}
 				if (currentDirectory.getParent() != null) {
 					prevDir = currentDirectory;
 					currentDirectory = currentDirectory.getParent();
@@ -308,6 +314,11 @@ public class CommandStream implements ActionListener {
 				input.setText("");
 				output.append("Current working directory is now " + currentDirectory.name() + "\n");
 			} else if(location.equals("-")) {
+				
+				if(step.equals("step2")) {
+					lv.playLevel1(step);
+					step = "step3";
+				}
 				
 				Directory temp = currentDirectory;
 				currentDirectory = prevDir;
