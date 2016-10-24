@@ -1,78 +1,97 @@
 import javax.swing.*;
 import java.util.ArrayList;
 import java.awt.*;
+import java.awt.Font;
+
+import java.util.Scanner;
 
 public class Parser {
-	
+
 	protected Directory dir;
-	
+
 	public static void main(String[] args) {
-		
+
 		Parser p = new Parser();
 		Directory root = p.buildLvls();
-		
+
 		//this is the window the UI will be housed in
 		JFrame window = new JFrame();
-		
+
+		final double SCREEN_X = Toolkit.getDefaultToolkit().getScreenSize().getWidth();
+		final double SCREEN_Y = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
+		int x = (int)(SCREEN_X / 2.5);
+		int y = (int)SCREEN_Y / 3;
+
 		JPanel graphicsPanel = new JPanel();
-		graphicsPanel.setPreferredSize(new Dimension(735, 400));
-		
+		graphicsPanel.setPreferredSize(new Dimension(x, y));
+
 		JPanel terminal = new JPanel();
+		terminal.setPreferredSize(new Dimension(x, y));
+
 		JPanel buttons = new JPanel();
 		buttons.setLayout(new FlowLayout());
-		
+
 		JButton save = new JButton("Ctrl + O");
 		JButton exit = new JButton("Ctrl + X");
 		save.setActionCommand("save");
 		exit.setActionCommand("exit");
-		
+
 		buttons.add(save);
 		buttons.add(exit);
-		
+
 		buttons.setVisible(false);
-		
+
 		/*
 		JLabel prompt = new JLabel();
 		prompt.setBackground(Color.BLACK);
 		prompt.setForeground(Color.WHITE);
 		prompt.setText(">");
 		*/
-		
+
 		//this is the input box
 		JTextField input = new JTextField(42);
-		
+		input.setCaretColor(Color.WHITE);
+		input.setFont(new Font("Courier", Font.PLAIN, 14));
+
 		//this is the output field
 		JTextArea output = new JTextArea(20, 35);
 		output.setEditable(false);
-		
+		output.setFont(new Font("Courier", Font.PLAIN, 14));
+
+		JScrollPane scrollGoal = new JScrollPane(output);
+		//scrollGoal.setVerticalScrollBarPolicy(scrollGoal.VERTICAL_SCROLLBAR_NEVER);
+		scrollGoal.getVerticalScrollBar().setVisible(false);
+		scrollGoal.getVerticalScrollBar().setPreferredSize(new Dimension(0,0));
+		scrollGoal.setBorder(null);
+
+
 		//these four lines set the color scheme to match a linux terminal
 		input.setBackground(Color.BLACK);
 		input.setForeground(Color.WHITE);
 		output.setBackground(Color.BLACK);
 		output.setForeground(Color.WHITE);
-		
+
 		//jpanel is necessary to align elements properly
 		JPanel grid = new JPanel();
-		
+
 		//boxlayout contains the input and output elements and aligns them appropriately
 		grid.setLayout(new BoxLayout(grid, BoxLayout.Y_AXIS));
-		
+
 		terminal.setLayout(new BoxLayout(terminal, BoxLayout.Y_AXIS));
 		//terminal.add(prompt, BorderLayout.NORTH);
 		terminal.add(input, BorderLayout.NORTH);
-		terminal.add(output, BorderLayout.SOUTH);
+		//terminal.add(output, BorderLayout.SOUTH);
+		terminal.add(scrollGoal, BorderLayout.SOUTH);
 		terminal.add(buttons, BorderLayout.SOUTH);
-		//terminal.add(save, BorderLayout.SOUTH);
-		//terminal.add(exit, BorderLayout.SOUTH);
-				
+
 		grid.add(graphicsPanel, BorderLayout.NORTH);
 		grid.add(terminal, BorderLayout.SOUTH);
-		
+
 		//makes the jpanel accessible through the jframe
 		window.add(grid);
-		
+
 		input.setBorder(javax.swing.BorderFactory.createLineBorder(Color.BLACK));
-		
+
 		//I don't actually know what pack() does, all I remember is my CS1122 instructor telling me it's good
 		window.pack();
 		window.setVisible(true);
@@ -85,7 +104,7 @@ public class Parser {
 		save.addActionListener(cs);
 		exit.addActionListener(cs);
 	}
-	
+
 	/**
 	 * This method constructs the basic file structure of a simulated linux system
 	 * @return a reference to the root directory
@@ -93,17 +112,13 @@ public class Parser {
 	private Directory buildLvls() {
 		Directory root = new Directory("root", null, new ArrayList<Directory>(), new ArrayList<File>());
 		Directory lv1 = new Directory("Level1", root, new ArrayList<Directory>(), new ArrayList<File>());
-		Directory lv2 = new Directory("Level2", root, new ArrayList<Directory>(), new ArrayList<File>());
+		//Directory lv2 = new Directory("Level2", root, new ArrayList<Directory>(), new ArrayList<File>());
 		root.addDirectory(lv1);
-		root.addDirectory(lv2);
+		///root.addDirectory(lv2);
 		buildLv1(lv1);
-		//File foo = new File("foo", "foo bar foobar");
-		//File foo2 = new File(".foo", "ftp, css, php, pen testing and other cs jargon here");
-		//root.addFile(foo);
-		//root.addFile(foo2);
 		return root;
 	}
-	
+
 	private void buildLv1(Directory lv1) {
 		Directory city = new Directory("City", lv1, new ArrayList<Directory>(), new ArrayList<File>());
 		Directory home = new Directory("Home", city, new ArrayList<Directory>(), new ArrayList<File>());
@@ -120,5 +135,5 @@ public class Parser {
 		egypt.addDirectory(giza);
 		giza.addFile(new File("slab.txt", ""));
 	}
-	
+
 }
