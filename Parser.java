@@ -5,11 +5,16 @@ import java.awt.*;
 public class Parser {
 
 	protected Directory dir;
+	protected Directory root;
 
+	public Parser() {
+		root = new Directory("root", null, new ArrayList<Directory>(), new ArrayList<File>());
+	}
+	
 	public static void main(String[] args) {
-
+		
 		Parser p = new Parser();
-		Directory root = p.buildLvls();
+		Directory startingDir = p.buildLvls(p.root);
 
 		//this is the window the UI will be housed in
 		JFrame window = new JFrame();
@@ -101,7 +106,8 @@ public class Parser {
 
 		//this sets up a listener and adds it to the input box, allowing for the input
 		//to be processed when the user presses [ENTER]
-		CommandStream cs = new CommandStream(input, output, root, root, buttons, "", graphicsTextOutput);
+		CommandStream cs = new CommandStream(input, output, p.root, p.root, buttons, "", graphicsTextOutput);
+		cs.setStartingDir(startingDir);
 		input.addActionListener(cs);
 		save.addActionListener(cs);
 		exit.addActionListener(cs);
@@ -112,18 +118,18 @@ public class Parser {
 	 * This method constructs the basic file structure of a simulated linux system
 	 * @return a reference to the root directory
 	 */
-	private Directory buildLvls() {
-		Directory root = new Directory("root", null, new ArrayList<Directory>(), new ArrayList<File>());
+	private Directory buildLvls(Directory root) {
 		Directory lv1 = new Directory("Level1", root, new ArrayList<Directory>(), new ArrayList<File>());
 		//Directory lv2 = new Directory("Level2", root, new ArrayList<Directory>(), new ArrayList<File>());
 		root.addDirectory(lv1);
 		///root.addDirectory(lv2);
-		buildLv1(lv1);
-		return root;
+		return buildLv1(lv1);
 	}
 
-	private void buildLv1(Directory lv1) {
+	private Directory buildLv1(Directory lv1) {
 		Directory city = new Directory("City", lv1, new ArrayList<Directory>(), new ArrayList<File>());
+		Directory library = new Directory("Library", lv1, new ArrayList<Directory>(), new ArrayList<File>());
+		city.addDirectory(library);
 		Directory home = new Directory("Home", city, new ArrayList<Directory>(), new ArrayList<File>());
 		lv1.addDirectory(city);
 		city.addDirectory(home);
@@ -137,6 +143,7 @@ public class Parser {
 		airport.addDirectory(egypt);
 		egypt.addDirectory(giza);
 		giza.addFile(new File("slab.txt", ""));
+		return library;
 	}
 
 }

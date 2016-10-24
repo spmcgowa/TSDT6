@@ -296,10 +296,6 @@ public class CommandStream implements ActionListener {
 					lv.playLevel1(step);
 					step = "step3";
 				}
-				if(step.equals("step2")) {
-					lv.playLevel1(step);
-					step = "step3";
-				}
 				if (currentDirectory.getParent() != null) {
 					prevDir = currentDirectory;
 					currentDirectory = currentDirectory.getParent();
@@ -314,11 +310,6 @@ public class CommandStream implements ActionListener {
 				input.setText("");
 				output.append("Current working directory is now " + currentDirectory.name() + "\n");
 			} else if(location.equals("-")) {
-				
-				if(step.equals("step2")) {
-					lv.playLevel1(step);
-					step = "step3";
-				}
 				
 				Directory temp = currentDirectory;
 				currentDirectory = prevDir;
@@ -424,6 +415,10 @@ public class CommandStream implements ActionListener {
 		} // next i
 
 		return dir;
+	}
+	
+	protected void setStartingDir(Directory d) {
+		currentDirectory = d;
 	}
 
 }

@@ -1,5 +1,3 @@
-import java.awt.event.MouseListener;
-
 import javax.swing.JTextArea;
 
 
@@ -21,7 +19,7 @@ public class Level1  {
 			//click.mouseClicked(null);
 			output.setText("While doing research in the library,\n<you> find a treasure map tucked away in the stacks.\nType ls to open the map.");
 		} else if(step.equals("step1")) {
-			output.setText("In Linux, the ls command lists files in the current\nworking directory.  Now go find the treasure!\nTo move around in the terminal, use the cd command.\ncity/library tells us that city is the parent direcory of library.\nType cd - or cd .. to move up to the parent directory.");
+			output.setText("In Linux, the ls command lists files in the current\nworking directory.  Now go find the treasure!\nTo move around in the terminal, use the cd command.\ncity/library tells us that city is the parent direcory of library.\nType cd .. to move up to the parent directory.");
 		} else if(step.equals("step2")) {
 			
 		}
