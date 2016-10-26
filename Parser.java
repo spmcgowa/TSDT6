@@ -10,9 +10,9 @@ public class Parser {
 	public Parser() {
 		root = new Directory("root", null, new ArrayList<Directory>(), new ArrayList<File>());
 	}
-	
+
 	public static void main(String[] args) {
-		
+
 		Parser p = new Parser();
 		Directory startingDir = p.buildLvls(p.root);
 
@@ -54,6 +54,7 @@ public class Parser {
 		//this is the input box
 		JTextField input = new JTextField(42);
 		input.setFont(new Font("Courier", Font.PLAIN, 14));
+		input.setCaretColor(Color.WHITE);
 		//this is the output field
 		JTextArea output = new JTextArea(20, 35);
 		output.setEditable(false);
