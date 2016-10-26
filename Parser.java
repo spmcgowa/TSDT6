@@ -10,9 +10,9 @@ public class Parser {
 	public Parser() {
 		root = new Directory("root", null, new ArrayList<Directory>(), new ArrayList<File>());
 	}
-
+	
 	public static void main(String[] args) {
-
+		
 		Parser p = new Parser();
 		Directory startingDir = p.buildLvls(p.root);
 
@@ -129,14 +129,18 @@ public class Parser {
 
 	private Directory buildLv1(Directory lv1) {
 		Directory city = new Directory("City", lv1, new ArrayList<Directory>(), new ArrayList<File>());
-		Directory library = new Directory("Library", lv1, new ArrayList<Directory>(), new ArrayList<File>());
-		city.addDirectory(library);
-		Directory home = new Directory("Home", city, new ArrayList<Directory>(), new ArrayList<File>());
 		lv1.addDirectory(city);
+		
+		Directory library = new Directory("Library", city, new ArrayList<Directory>(), new ArrayList<File>());
+		city.addDirectory(library);
+		
+		Directory home = new Directory("Home", city, new ArrayList<Directory>(), new ArrayList<File>());
 		city.addDirectory(home);
+		
 		Directory airport = new Directory("Airport", city, new ArrayList<Directory>(), new ArrayList<File>());
-		city.addDirectory(airport);
 		airport.addFile(new File("Luggage.txt", ""));
+		city.addDirectory(airport);
+		
 		Directory baggage = new Directory("BaggageCheck", airport, new ArrayList<Directory>(), new ArrayList<File>());
 		Directory egypt = new Directory("Egypt", airport, new ArrayList<Directory>(), new ArrayList<File>());
 		Directory giza = new Directory("Giza", egypt, new ArrayList<Directory>(), new ArrayList<File>());

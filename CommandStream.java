@@ -16,6 +16,8 @@ public class CommandStream implements ActionListener {
 	final Directory root;
 	String step = "step0";
 	Level1 lv;
+	Thread story;
+	boolean storyReadyToAdvance = true;
 
 	public CommandStream(JTextField input, JTextArea output, Directory cd,
 			Directory root, JPanel buttons, String lv1, JTextArea graphicsTextOutput) {
@@ -26,11 +28,12 @@ public class CommandStream implements ActionListener {
 		this.buttons = buttons;
 		nanoFile = null;
 		prevDir = null;
-		ClickListener click = new ClickListener(graphicsTextOutput);
+		//ClickListener click = new ClickListener(graphicsTextOutput);
 		lv = new Level1(step, graphicsTextOutput/*, click*/);
 		lv.playLevel1(step);
 		step = "step1";
-		output.addMouseListener(click);
+		this.story = new Thread(lv);
+		//output.addMouseListener(click);
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -61,11 +64,13 @@ public class CommandStream implements ActionListener {
 		if (scan.hasNext()) {
 			command = scan.next();
 		}
-
+		
+		/*
 		if (command.equals("")) {
 			output.requestFocus();
 			return;
 		}
+		*/
 
 		// block of if statements to find the command the user entered
 		if (command.equals("mv")) {
@@ -131,6 +136,8 @@ public class CommandStream implements ActionListener {
 			nano(input, output, buttons, f);
 		} else if (command.equals("scp")) {
 
+		} else if(command.equals("")) {
+			story.run();
 		} else {
 			invalid(input, output);
 		}
@@ -249,9 +256,10 @@ public class CommandStream implements ActionListener {
 	}
 
 	public void pwd(JTextArea output, Directory currentDirectory) {
-		if(step.equals("step2")) {
+		if(step.equals("step3")) {
+			lv.setAdvanceable(true);
 			lv.playLevel1(step);
-			step = "step3";
+			step = "step4";
 		}
 		String path = "";
 
@@ -267,8 +275,10 @@ public class CommandStream implements ActionListener {
 
 	public void ls(JTextField input, JTextArea output, boolean a) {
 		if(step.equals("step1")) {
+			lv.setAdvanceable(true);
 			lv.playLevel1(step);
 			step = "step2";
+			//lv.setAdvanceable(false);
 		}
 		for (Directory dir : currentDirectory.getSubDirs()) {
 			output.append(dir.name() + "\n");
