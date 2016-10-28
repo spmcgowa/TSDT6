@@ -16,7 +16,6 @@ public class CommandStream implements ActionListener {
 	final Directory root;
 	String step = "step0";
 	Level1 lv;
-	Thread story;
 	boolean storyReadyToAdvance = true;
 
 	public CommandStream(JTextField input, JTextArea output, Directory cd,
@@ -28,12 +27,9 @@ public class CommandStream implements ActionListener {
 		this.buttons = buttons;
 		nanoFile = null;
 		prevDir = null;
-		//ClickListener click = new ClickListener(graphicsTextOutput);
 		lv = new Level1(step, graphicsTextOutput/*, click*/);
 		lv.playLevel1(step);
 		step = "step1";
-		this.story = new Thread(lv);
-		//output.addMouseListener(click);
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -64,13 +60,6 @@ public class CommandStream implements ActionListener {
 		if (scan.hasNext()) {
 			command = scan.next();
 		}
-		
-		/*
-		if (command.equals("")) {
-			output.requestFocus();
-			return;
-		}
-		*/
 
 		// block of if statements to find the command the user entered
 		if (command.equals("mv")) {
@@ -128,7 +117,6 @@ public class CommandStream implements ActionListener {
 			
 			File f = findFile(fileName, currentDirectory);
 			if (f == null) {
-				//output.append("File " + f + " not found.\n");
 				f = new File(fileName, "");
 				currentDirectory.addFile(f);
 			}
@@ -137,7 +125,7 @@ public class CommandStream implements ActionListener {
 		} else if (command.equals("scp")) {
 
 		} else if(command.equals("")) {
-			story.run();
+			lv.playLevel1("");
 		} else {
 			invalid(input, output);
 		}
@@ -256,11 +244,7 @@ public class CommandStream implements ActionListener {
 	}
 
 	public void pwd(JTextArea output, Directory currentDirectory) {
-		if(step.equals("step3")) {
-			lv.setAdvanceable(true);
-			lv.playLevel1(step);
-			step = "step4";
-		}
+		lv.playLevel1("pwd");
 		String path = "";
 
 		// first use of a do-while loop, I'm so proud!
@@ -274,12 +258,7 @@ public class CommandStream implements ActionListener {
 	}
 
 	public void ls(JTextField input, JTextArea output, boolean a) {
-		if(step.equals("step1")) {
-			lv.setAdvanceable(true);
-			lv.playLevel1(step);
-			step = "step2";
-			//lv.setAdvanceable(false);
-		}
+		lv.playLevel1("ls");
 		for (Directory dir : currentDirectory.getSubDirs()) {
 			output.append(dir.name() + "\n");
 		}
@@ -302,10 +281,7 @@ public class CommandStream implements ActionListener {
 
 			// second check: is the cd argument ..?
 			if (location.equals("..")) {
-				if(step.equals("step2")) {
-					lv.playLevel1(step);
-					step = "step3";
-				}
+				lv.playLevel1("cd");
 				if (currentDirectory.getParent() != null) {
 					prevDir = currentDirectory;
 					currentDirectory = currentDirectory.getParent();

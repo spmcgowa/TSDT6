@@ -123,7 +123,7 @@ public class Parser {
 		Directory lv1 = new Directory("Level1", root, new ArrayList<Directory>(), new ArrayList<File>());
 		//Directory lv2 = new Directory("Level2", root, new ArrayList<Directory>(), new ArrayList<File>());
 		root.addDirectory(lv1);
-		///root.addDirectory(lv2);
+		//root.addDirectory(lv2);
 		return buildLv1(lv1);
 	}
 

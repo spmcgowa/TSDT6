@@ -1,25 +1,46 @@
 import javax.swing.JTextArea;
 
 
-public class Level1 implements Runnable {
+public class Level1 {
 
 	CommandStream cs;
 	String step;
 	String dialogStep;
 	JTextArea output;
 	boolean advanceable = false;
-	//MouseListener click;
+	int stepCount;
 	
-	public Level1(String step, JTextArea output/*, MouseListener click*/) {
+	public Level1(String step, JTextArea output) {
 		this.step = step;
 		this.output = output;
 		dialogStep = "1";
-		//this.click = click;
+		stepCount = 0;
 	}
 	
-	public void playLevel1(String step) {
+	public void playLevel1(String command) {
+		if(stepCount == 0) {
+			output.setText("While doing research in the library, Dr. <you> finds a treasure map tucked away in the stacks.\nIt appears to lead to <insert cool location here> that contains relics that belong\nin a museum.  Let's go on an adventure!");
+			stepCount++;
+		} else if(command.equals("") && stepCount == 1) {
+			output.setText("Type ls to open the map.");
+			stepCount++;
+		} else if(command.equals("ls") && stepCount == 2) {
+			output.setText("In Linux, the ls command lists files and other directories in your current working directory");
+			stepCount++;
+		} else if(command.equals("") && stepCount == 3) {
+			output.setText("In Linux, the ls command lists files in the current working directory.");
+			stepCount++;
+		} else if(command.equals("") && stepCount == 4) {
+			output.setText("So now we know everything that's in the library, but what about\nwhat's outside the library?");
+			stepCount++;
+		} else if(command.equals("") && stepCount == 5) {
+			output.setText("To find out where we currently are, we can use the command pwd.");
+			stepCount++;
+		} else if(command.equals("pwd") && stepCount == 6) {
+			output.setText("pwd works like a compass.");
+		}
+		/*
 		if(step.equals("step0")) {
-			//click.mouseClicked(null);
 			output.setText("While doing research in the library,\n<you> find a treasure map tucked away in the stacks. Type ls to open the map.");
 			advanceDialog();
 		} else if(step.equals("step1")) {
@@ -32,9 +53,11 @@ public class Level1 implements Runnable {
 			advanceable = true;
 			advanceDialog();
 		}
+		*/
 		
 	}
 
+	/*
 	public void advanceDialog() {
 		if(!advanceable) {
 			return;
@@ -69,13 +92,5 @@ public class Level1 implements Runnable {
 			
 		}
 	}
-	
-	@Override
-	public void run() {
-		advanceDialog();
-	}
-	
-	protected void setAdvanceable(boolean b) {
-		advanceable = b;
-	}
+	*/
 }
