@@ -75,6 +75,7 @@ public class CommandStream implements ActionListener {
 		} else if (command.equals("clear")) {
 			output.setText("");
 			input.setText("");
+			lv.playLevel1("clear");
 		} else if (command.equals("cd")) {
 			cd(input, output, scan);
 		} else if (command.equals("cat")) {
@@ -170,10 +171,12 @@ public class CommandStream implements ActionListener {
 		currentDirectory.delFile(file);
 
 		String[] filePath = path.split("/");
-		String[] actualPath = new String[filePath.length - 1];
+		String[] actualPath = /*new String[filePath.length - 1];*/filePath;
+		/*
 		for(int i = 0; i < filePath.length - 1; i++) {
 			actualPath[i] = filePath[i];
 		}
+		*/
 
 		// locate final directory destination
 		Directory destination = validateFilePath(actualPath);
@@ -203,6 +206,8 @@ public class CommandStream implements ActionListener {
 		file.setName(filePath[filePath.length - 1]);
 		destination.addFile(file);
 
+		lv.playLevel1("mv luggage");
+		
 		input.setText("");
 	}
 
@@ -281,10 +286,10 @@ public class CommandStream implements ActionListener {
 
 			// second check: is the cd argument ..?
 			if (location.equals("..")) {
-				lv.playLevel1("cd");
 				if (currentDirectory.getParent() != null) {
 					prevDir = currentDirectory;
 					currentDirectory = currentDirectory.getParent();
+					lv.playLevel1("cd");
 				}
 
 				input.setText("");
@@ -295,13 +300,19 @@ public class CommandStream implements ActionListener {
 				currentDirectory = root;
 				input.setText("");
 				output.append("Current working directory is now " + currentDirectory.name() + "\n");
+				lv.playLevel1("cd");
 			} else if(location.equals("-")) {
 				
+				if(prevDir == null) {
+					output.append("No previous directory available.");
+					return;
+				}
 				Directory temp = currentDirectory;
 				currentDirectory = prevDir;
 				prevDir = temp;
 				input.setText("");
 				output.append("Current working directory is now " + currentDirectory.name() + "\n");
+				lv.playLevel1("cd");
 			} else {
 				
 				for(Directory dr : currentDirectory.getSubDirs()) {
@@ -310,12 +321,14 @@ public class CommandStream implements ActionListener {
 						currentDirectory = dr;
 						output.append("Current working directory is " + dr.name() + "\n");
 						input.setText("");
+						lv.playLevel1("cd");
 						return;
 					}
 				}
 				
 				Directory d = validateFilePath(location.split("/"));
-				if(d == null) {
+				
+				if(d == null || !d.equals(location)) {
 					output.append("Invalid file path.\n");
 					return;
 				}
@@ -324,6 +337,7 @@ public class CommandStream implements ActionListener {
 				currentDirectory = d;
 				input.setText("");
 				output.append("Current working directory is now " + currentDirectory.name() + "\n");
+				lv.playLevel1("cd");
 			} // end else
 		} else {
 			output.append("Invalid parameters." + "\n");
@@ -370,11 +384,10 @@ public class CommandStream implements ActionListener {
 
 		// this loop checks each directory name specified in the path argument
 		for (int i = 0; i < path.length; i++) {
-			// and ignores the /root part, starting with a subdirectory of root
 			if (path[i].equals("") || path[i].equals(root.name())) {
 				continue;
 			} // end if
-
+			
 			// yes, this has a terrible big-oh runtime, but it works; this
 			// checks each
 			// subdirectory all the way down to make sure the given path is
