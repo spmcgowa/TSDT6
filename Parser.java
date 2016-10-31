@@ -1,6 +1,8 @@
 import javax.swing.*;
 import java.util.ArrayList;
 import java.awt.*;
+import java.awt.Graphics;
+import java.awt.Image;
 
 public class Parser {
 
@@ -10,9 +12,9 @@ public class Parser {
 	public Parser() {
 		root = new Directory("root", null, new ArrayList<Directory>(), new ArrayList<File>());
 	}
-	
+
 	public static void main(String[] args) {
-		
+
 		Parser p = new Parser();
 		Directory startingDir = p.buildLvls(p.root);
 
@@ -25,7 +27,7 @@ public class Parser {
 		int y = (int)SCREEN_Y / 3;
 
 		JPanel graphicsPanel = new JPanel();
-		graphicsPanel.setPreferredSize(new Dimension(x, y));
+		graphicsPanel.setPreferredSize(new Dimension(x/4, y/4));
 		graphicsPanel.setLayout(new BoxLayout(graphicsPanel, BoxLayout.X_AXIS));
 
 		JPanel terminal = new JPanel();
@@ -66,11 +68,11 @@ public class Parser {
 		scrollGoal.getVerticalScrollBar().setPreferredSize(new Dimension(0,0));
 		scrollGoal.setBorder(null);
 
-		JTextArea graphicsTextOutput = new JTextArea(20, 10);
+		JTextPane graphicsTextOutput = new JTextPane();
 		graphicsTextOutput.setEditable(false);
 		graphicsTextOutput.setVisible(true);
-		graphicsTextOutput.setBackground(Color.GREEN);
 		graphicsTextOutput.setPreferredSize(new Dimension(x, y/3));
+		graphicsTextOutput.setLocation(10, 10);
 		graphicsPanel.add(graphicsTextOutput, BorderLayout.SOUTH);
 
 		//these four lines set the color scheme to match a linux terminal
@@ -92,8 +94,15 @@ public class Parser {
 		terminal.add(scrollGoal, BorderLayout.SOUTH);
 		terminal.add(buttons, BorderLayout.SOUTH);
 
+		ImageIcon img = new ImageIcon("penguin.png");
+		JLabel label = new JLabel(img);
+		label.setBackground(Color.GREEN);
+		grid.add(label);
+
+
 		grid.add(graphicsPanel, BorderLayout.NORTH);
 		grid.add(terminal, BorderLayout.SOUTH);
+
 
 		//makes the jpanel accessible through the jframe
 		window.add(grid);
@@ -130,17 +139,17 @@ public class Parser {
 	private Directory buildLv1(Directory lv1) {
 		Directory city = new Directory("City", lv1, new ArrayList<Directory>(), new ArrayList<File>());
 		lv1.addDirectory(city);
-		
+
 		Directory library = new Directory("Library", city, new ArrayList<Directory>(), new ArrayList<File>());
 		city.addDirectory(library);
-		
+
 		Directory home = new Directory("Home", city, new ArrayList<Directory>(), new ArrayList<File>());
 		city.addDirectory(home);
-		
+
 		Directory airport = new Directory("Airport", city, new ArrayList<Directory>(), new ArrayList<File>());
 		airport.addFile(new File("Luggage.txt", ""));
 		city.addDirectory(airport);
-		
+
 		Directory baggage = new Directory("BaggageCheck", airport, new ArrayList<Directory>(), new ArrayList<File>());
 		Directory egypt = new Directory("Egypt", airport, new ArrayList<Directory>(), new ArrayList<File>());
 		Directory giza = new Directory("Giza", egypt, new ArrayList<Directory>(), new ArrayList<File>());
