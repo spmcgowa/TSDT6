@@ -23,13 +23,12 @@ public class CommandStream implements ActionListener {
 			Directory root, JPanel buttons, String lv1, JTextArea graphicsTextOutput) {
 		this.input = input;
 		this.output = output;
-		currentDirectory = cd;
+		setCurrentDirectory(cd);
 		this.root = root;
 		this.buttons = buttons;
 		nanoFile = null;
 		prevDir = null;
 		lv = new Level1(step, graphicsTextOutput/*, click*/);
-		lv.playLevel1(step);
 		step = "step1";
 	}
 
@@ -55,34 +54,44 @@ public class CommandStream implements ActionListener {
 		String text = input.getText();
 		input.setText("");
 		ArrayList<Command> commands = Command.GenerateCommands(text);
-		
+		TerminalError error = null;
 		//Loop through all commands found and do them in order!
 		for (int i = 0; i < commands.size(); i++) {
 			Command command = commands.get(i);
+			sendOutput("> " + command.getSimpleString() + "\n");
 			if (command.isErrored()) {
 				invalid(input, output);
 			}
 			
 			if (command.getCommand().equals("mv")) {
 			} else if (command.getCommand().equals("ls")) {
-				ls(command);
+				error = ls(command);
 			} else if (command.getCommand().equals("exit")) {
-				exit();
+				error = exit();
 			} else if (command.getCommand().equals("clear")) {
-				clear(command);
+				error = clear(command);
 			} else if (command.getCommand().equals("cd")) {
-				cd(command);
+				error = cd(command);
 			} else if (command.getCommand().equals("cat")) {
-				cat(command);
+				error = cat(command);
 			} else if (command.getCommand().equals("pwd")) {
-				pwd(command);
+				error = pwd(command);
 			} else if (command.getCommand().equals("cp")) {
-				cp(command);
+				error = cp(command);
 			} else if (command.getCommand().equals("nano")) {
-				nano(command);
-			} else if(command.getCommand().equals("")) {
-				lv.playLevel1("");
+				error = nano(command);
 			}
+			
+			
+			//Handle Errors!
+			if (error != null)  {
+				//Output Error!
+				sendOutput(error.getString());
+			}
+		} // End for loop!
+		
+		if (commands != null) {
+			lv.playLevel1(text);
 		}
 	}
 	
@@ -106,45 +115,80 @@ public class CommandStream implements ActionListener {
 		return null;
 	}
 
-	public Directory validateFilePath(String[] path) {
-		boolean thereIsAProblem = false;
-
-		// start at the root
-		Directory dir = root;
-
-		// this loop checks each directory name specified in the path argument
-		for (int i = 0; i < path.length; i++) {
-			if (path[i].equals("") || path[i].equals(root.name())) {
-				continue;
-			} // end if
-			
-			// yes, this has a terrible big-oh runtime, but it works; this
-			// checks each
-			// subdirectory all the way down to make sure the given path is
-			// valid
-			for (Directory d : dir.getSubDirs()) {
-				if (d.name().equals(path[i])) {
-					dir = d;
-					thereIsAProblem = false;
-					break;
-				} else {
-					thereIsAProblem = true;
-				} // end if
-			} // next d
-
-			// if there is a problem (i.e. /root/badDir/username, where badDir
-			// doesn't exist) return null for no directory found
-			if (thereIsAProblem) {
-				if(i == path.length - 1) {
-					return dir;
-				}
-				return null;
-			}
-
-		} // next i
-
-		return dir;
+	class SearchResults {
+		public boolean validPath;
+		public Directory lastFoundDir;
+		public boolean endsWithFile;
+		public String lastToken; //Is a file name or the desired file name
+		public SearchResults() {
+			this.validPath = true;
+			this.lastFoundDir = null;
+			this.endsWithFile = false;
+			this.lastToken = "";
+		}
 	}
+	
+	
+	public void setCurrentDirectory(Directory dir) {
+		if (dir == null) {
+			System.out.println("A method tried to set the current directory to null");
+			return;
+		}
+		currentDirectory = dir;
+	}
+	
+	
+	public SearchResults validateFilePath(String path) {
+		//We know the current directory, it is part of the command stream
+		String[] tokens = path.split("/");
+		SearchResults searchR = new SearchResults();
+		Directory cDir = currentDirectory;
+		for (int i = 0; i < tokens.length; i++) {
+			
+			if (("").equals(tokens[i]) || root.name().equals(tokens[i])) {
+				continue;
+			}
+			else if (i == 0 && (".").equals(tokens[i])) {
+				cDir = root;
+			}
+			else if (("..").equals(tokens[i])) {
+				if (cDir != root) {
+					if (cDir.parent == null) {
+						System.out.println("Error in file heirarchy! " + cDir.name + " is not root and does not have a Parent\n");
+					}
+					else if (cDir == cDir.parent) {
+						System.out.println("Error in file heirarchy! " + cDir.name + " is its own parent!\n");
+					}
+					cDir = cDir.parent;
+				}
+			}
+			else {
+				boolean found = false;
+				for (Directory d : cDir.getSubDirs()) {
+					if (d.name().equals(tokens[i])) { 
+						cDir = d;
+						searchR.lastFoundDir = d;
+						found = true;
+						break;
+					}
+				}
+				if (found == false) {
+					if (i == tokens.length - 1) {
+						// We ended with an unknown directory/file
+						searchR.endsWithFile = true;
+						searchR.lastToken = tokens[i];
+					}
+					else {
+						//UhOh, our path is wrong!
+						searchR.validPath = false;
+					}
+				}
+			}
+		}
+		searchR.lastFoundDir = cDir;
+		return searchR;
+	}
+
 	public void sendOutput(String out) {
 		output.append(out);
 	}
@@ -187,10 +231,9 @@ public class CommandStream implements ActionListener {
 		// Flags
 			// None
 	//-----------------------------------------------------------
-	public void clear(Command command) {
-		output.setText("");
-		input.setText("");
-		lv.playLevel1("clear");
+	public TerminalError clear(Command command) {
+		output.setText(""); // Special for clear, do not change to sendOutput()
+		return null;
 	}
 	
 	
@@ -203,81 +246,55 @@ public class CommandStream implements ActionListener {
 		// Flags
 			// None
 	//-----------------------------------------------------------
-	public void mv(Command command) {
-		
-		
-
-		String name = null;
-		String path = null;
-
-		// checking file parameter
-		if (scan.hasNext()) {
-			name = scan.next();
-		} else {
-			output.append("Missing filename parameter.\n");
-			return;
+	public TerminalError mv(Command command) {
+		if (command.getInputs().size() < 2) {
+			return new TerminalError("Not enough arguments.\n");
 		}
+		String fileName = command.getInputs().get(0);
+		String path = command.getInputs().get(1);
 
 		// locating specified file (could be null if no such file)
-		File file = findFile(name, currentDirectory);
+		File file = findFile(fileName, currentDirectory);
 
 		// checking for existence of specified file
 		if (file == null) {
-			output.append("File " + name + " not found.\n");
-			return;
-		}
-
-		// checking for filepath destination parameter
-		if (scan.hasNext()) {
-			path = scan.next();
-		} else {
-			output.append("Missing parameter\n");
-			return;
+			return new TerminalError("File " + fileName + " not found.\n");
 		}
 
 		// deleting file from current location (file still exists because of
 		// "file" variable)
 		currentDirectory.delFile(file);
 
-		String[] filePath = path.split("/");
-		String[] actualPath = /*new String[filePath.length - 1];*/filePath;
-		/*
-		for(int i = 0; i < filePath.length - 1; i++) {
-			actualPath[i] = filePath[i];
-		}
-		*/
-
 		// locate final directory destination
-		Directory destination = validateFilePath(actualPath);
+		SearchResults results = validateFilePath(path);
 
 		// check for a valid destination; if not, add the file back to the
 		// current directory
-		if (destination == null) {
-			output.append("Invalid file path!\n");
+		if (results.validPath == false) {
 			currentDirectory.addFile(file);
-			return;
+			return new TerminalError("Invalid file path!\n");
 		}
 
 		// mv can be used to rename, this takes care of that
-		String newFileName = filePath[filePath.length - 1];
+		String newFileName = results.lastToken;
 
 		// this for-each loop looks for a directory with the same name as the
 		// file and overwrites it with the file if so,
 		// just like actual Linux
-		for (Directory d : destination.getSubDirs()) {
+		for (Directory d : results.lastFoundDir.getSubDirs()) {
 			if (d.name().equals(newFileName)) {
-				destination.remDir(d);
+				results.lastFoundDir.remDir(d);
 				break;
 			}
 		}
 
 		// this updates the file's name and adds it to the appropriate directory
-		file.setName(filePath[filePath.length - 1]);
-		destination.addFile(file);
-
-		lv.playLevel1("mv luggage");
+		file.setName(newFileName);
+		results.lastFoundDir.addFile(file);
 		
 		input.setText("");
+		
+		return null;
 	}
 
 	//-----------------------------------------------------------
@@ -289,32 +306,36 @@ public class CommandStream implements ActionListener {
 		// Flags
 			// None
 	//-----------------------------------------------------------
-	public void cp(Command command) {
+	public TerminalError cp(Command command) {
+		if (command.getInputs().size() < 2) {
+			return new TerminalError("Not enough Arguments.\n");
+		}
+		String fileName = command.getInputs().get(0);
+		String path = command.getInputs().get(1);
 		
 		File f = findFile(fileName, currentDirectory);
 		if (f == null) {
-			output.append("File " + f + " not found!\n");
-			return;
+			return new TerminalError("File " + f + " not found!\n");
 		}
-		String path[] = destName.split("/");
+		SearchResults results = validateFilePath(path);
 		
-		Directory destination = validateFilePath(path);
-		if (destination == null) {
-			output.append("Invalid path!\n");
-			return;
+		if (results.lastFoundDir == null) {
+			return new TerminalError("Invalid path!\n");
 		}
 		
 		String name = f.getName();
 		
 		//filename specified
-		if(!destination.name().equals(path[path.length - 1])) {
-			name = path[path.length - 1];
+		if(results.endsWithFile) {
+			name = results.lastToken;
 		}
 		
-		destination.addFile(new File(name, f.getContents()));
+		results.lastFoundDir.addFile(new File(name, f.getContents()));
 		input.setText("");
-		output.append("File " + name + " successfully copied to "
-				+ destination.name() + "\n");
+		sendOutput("File " + name + " successfully copied to "
+				+ results.lastFoundDir.name() + "\n");
+		
+		return null;
 	}
 
 	
@@ -327,7 +348,18 @@ public class CommandStream implements ActionListener {
 		// Flags
 			// None
 	//-----------------------------------------------------------
-	public void nano(Command command) {
+	public TerminalError nano(Command command) {
+		if (command.getInputs().size() < 1) {
+			return new TerminalError("Not Enough Arguments.\n");
+		}
+		
+		String fileName = command.getInputs().get(0);
+		
+		File f = findFile(fileName, currentDirectory);
+		if (f == null) {
+			return new TerminalError("File " + f + " not found!\n");
+		}
+		
 		input.setText("");
 		output.setText(f.getContents());
 		input.setEditable(false);
@@ -335,6 +367,8 @@ public class CommandStream implements ActionListener {
 		output.requestFocus();
 		buttons.setVisible(true);
 		nanoFile = f;
+		
+		return null;
 	}
 
 	
@@ -347,18 +381,12 @@ public class CommandStream implements ActionListener {
 		// Flags
 			// None
 	//-----------------------------------------------------------
-	public void pwd(Command command) {
-		lv.playLevel1("pwd");
-		String path = "";
-
-		// first use of a do-while loop, I'm so proud!
-		do {
-			path = "/" + currentDirectory.name() + path;
-			currentDirectory = currentDirectory.getParent();
-		} while (currentDirectory != null);
-
-		output.append(path + "\n");
-		input.setText("");
+	public TerminalError pwd(Command command) {
+		String path = currentDirectory.getPath();
+		
+		sendOutput(path + "\n");
+		
+		return null;
 	}
 
 	//-----------------------------------------------------------
@@ -371,21 +399,23 @@ public class CommandStream implements ActionListener {
 			// -a
 				// Listing includes normally hidden files
 	//-----------------------------------------------------------
-	public void ls(Command command) {
-		lv.playLevel1("ls");
+	public TerminalError ls(Command command) {		
+		if (currentDirectory == null) {
+			System.out.println("NO CURRENT DIRECTORY!");
+		}
 		for (Directory dir : currentDirectory.getSubDirs()) {
-			output.append(dir.name() + "\n");
+			sendOutput(dir.name() + "\n");
 		}
 		for (File file : currentDirectory.getFiles()) {
-			if (a) {
-				output.append(file.getName() + "\n");
+			if (command.getFlags().size() == 1 && command.getFlags().get(0).equals("-a")) {
+				sendOutput(file.getName() + "\n");
 			} else {
 				if (file.getName().charAt(0) != '.') {
-					output.append(file.getName() + "\n");
+					sendOutput(file.getName() + "\n");
 				}
 			}
 		}
-		input.setText("");
+		return null;
 	}
 
 	//-----------------------------------------------------------
@@ -397,69 +427,19 @@ public class CommandStream implements ActionListener {
 		// Flags
 			// None
 	//-----------------------------------------------------------
-	public void cd(Command command) {
-		// first check: does cd have an argument?
-		if (scan.hasNext()) {
-			String location = scan.next();
-
-			// second check: is the cd argument ..?
-			if (location.equals("..")) {
-				if (currentDirectory.getParent() != null) {
-					prevDir = currentDirectory;
-					currentDirectory = currentDirectory.getParent();
-					lv.playLevel1("cd");
-				}
-
-				input.setText("");
-				output.append("Current working directory is now "
-						+ currentDirectory.name() + "\n");
-			} else if(location.equals("/")) {
-				prevDir = currentDirectory;
-				currentDirectory = root;
-				input.setText("");
-				output.append("Current working directory is now " + currentDirectory.name() + "\n");
-				lv.playLevel1("cd");
-			} else if(location.equals("-")) {
-				
-				if(prevDir == null) {
-					output.append("No previous directory available.");
-					return;
-				}
-				Directory temp = currentDirectory;
-				currentDirectory = prevDir;
-				prevDir = temp;
-				input.setText("");
-				output.append("Current working directory is now " + currentDirectory.name() + "\n");
-				lv.playLevel1("cd");
-			} else {
-				
-				for(Directory dr : currentDirectory.getSubDirs()) {
-					if(dr.name().equals(location)) {
-						prevDir = currentDirectory;
-						currentDirectory = dr;
-						output.append("Current working directory is " + dr.name() + "\n");
-						input.setText("");
-						lv.playLevel1("cd");
-						return;
-					}
-				}
-				
-				Directory d = validateFilePath(location.split("/"));
-				
-				if(d == null || !d.equals(location)) {
-					output.append("Invalid file path.\n");
-					return;
-				}
-				
-				prevDir = currentDirectory;
-				currentDirectory = d;
-				input.setText("");
-				output.append("Current working directory is now " + currentDirectory.name() + "\n");
-				lv.playLevel1("cd");
-			} // end else
-		} else {
-			output.append("Invalid parameters." + "\n");
-		} // end scan.hasNext check
+	public TerminalError cd(Command command) {
+		if (command.getInputs().size() < 1) {
+			return new TerminalError("Not enough Arguments.\n");
+		}
+		String path = command.getInputs().get(0);
+		SearchResults results = validateFilePath(path);
+		if (results.validPath) {
+			setCurrentDirectory(results.lastFoundDir);
+		}
+		else {
+			return new TerminalError("Invalid File Path");
+		}
+		return null;
 	} // end method
 
 	
@@ -467,19 +447,25 @@ public class CommandStream implements ActionListener {
 	// Command: cat
 			// Description: Outputs a text file to the screen
 		// Input
-			// Required: 0=File
+			// Required: 0=Path
 			// Optional: None
 		// Flags
 			// None
 	//-----------------------------------------------------------
-	public void cat(Command command) {
-		File file = findFile(filename, dir);
-		if (file == null) {
-			output.append("No such file.\n");
-			return;
+	//[TODO] This does not currently use file paths correctly
+	public TerminalError cat(Command command) {
+		if (command.getInputs().size() < 1) {
+			return new TerminalError("Not enough Arguments.\n");
 		}
-		input.setText("");
-		output.append(file.getContents() + "\n");
+		String fileName = command.getInputs().get(0);
+		
+		File file = findFile(fileName, currentDirectory);
+		if (file == null) {
+			return new TerminalError("No such file.\n");
+		}
+		sendOutput(file.getContents() + "\n");
+		
+		return null;
 	}
 
 	
@@ -492,8 +478,9 @@ public class CommandStream implements ActionListener {
 		// Flags
 			// None
 	//-----------------------------------------------------------
-	public void exit() {
+	public TerminalError exit() {
 		System.exit(0);
+		return null;
 	}
 
 	// End block of Command Methods

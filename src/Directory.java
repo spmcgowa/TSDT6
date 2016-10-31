@@ -3,15 +3,30 @@ import java.util.ArrayList;
 public class Directory {
 	
 	public String name;
-	protected Directory parent;
-	protected ArrayList<Directory> subDirectories;
-	protected ArrayList<File> files;
+	public Directory parent;
+	public ArrayList<Directory> subDirectories;
+	public ArrayList<File> files;
 	
 	public Directory(String name, Directory parent, ArrayList<Directory> contents, ArrayList<File> files) {
 		this.name = name;
 		this.parent = parent;
 		subDirectories = contents;
 		this.files = files;
+		
+		
+		if (parent == null) {
+			System.out.println(name + " directory does not have a parent.\n");
+		}
+	}
+	
+	public String getPath() {
+		String ret = "";
+		Directory c = this;
+		while (c != null) {
+			ret = c.name + "/" + ret;
+			c = c.parent;
+		}
+		return ret;
 	}
 	
 	public ArrayList<Directory> getSubDirs() {

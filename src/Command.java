@@ -6,6 +6,12 @@ public class Command {
 	String command;
 	ArrayList<String> flags;
 	ArrayList<String> inputs;
+	
+	public static Command emptyCommand() {
+		Command ret = new Command();
+		ret.setCommand("");
+		return ret;
+	}
 
 	public static ArrayList<Command> GenerateCommands(String input) {
 		Scanner read = new Scanner(input);
