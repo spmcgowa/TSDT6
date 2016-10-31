@@ -16,11 +16,10 @@ public class CommandStream implements ActionListener {
 	final Directory root;
 	String step = "step0";
 	Level1 lv;
-	Thread story;
 	boolean storyReadyToAdvance = true;
 
 	public CommandStream(JTextField input, JTextArea output, Directory cd,
-			Directory root, JPanel buttons, String lv1, JTextArea graphicsTextOutput) {
+			Directory root, JPanel buttons, String lv1, JTextPane graphicsTextOutput) {
 		this.input = input;
 		this.output = output;
 		currentDirectory = cd;
@@ -28,10 +27,9 @@ public class CommandStream implements ActionListener {
 		this.buttons = buttons;
 		nanoFile = null;
 		prevDir = null;
-		lv = new Level1(step, graphicsTextOutput/*, click*/);
+		lv = new Level1(step, graphicsTextOutput);
 		lv.playLevel1(step);
 		step = "step1";
-		this.story = new Thread(lv);
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -116,7 +114,7 @@ public class CommandStream implements ActionListener {
 			}
 
 			String fileName = scan.next();
-			
+
 			File f = findFile(fileName, currentDirectory);
 			if (f == null) {
 				f = new File(fileName, "");
@@ -127,7 +125,7 @@ public class CommandStream implements ActionListener {
 		} else if (command.equals("scp")) {
 
 		} else if(command.equals("")) {
-			story.run();
+			lv.playLevel1("");
 		} else {
 			invalid(input, output);
 		}
@@ -215,20 +213,20 @@ public class CommandStream implements ActionListener {
 			return;
 		}
 		String path[] = dest.split("/");
-		
+
 		Directory destination = validateFilePath(path);
 		if (destination == null) {
 			output.append("Invalid path!\n");
 			return;
 		}
-		
+
 		String name = f.getName();
-		
+
 		//filename specified
 		if(!destination.name().equals(path[path.length - 1])) {
 			name = path[path.length - 1];
 		}
-		
+
 		destination.addFile(new File(name, f.getContents()));
 		input.setText("");
 		output.append("File " + name + " successfully copied to "
@@ -246,11 +244,7 @@ public class CommandStream implements ActionListener {
 	}
 
 	public void pwd(JTextArea output, Directory currentDirectory) {
-		if(step.equals("step3")) {
-			lv.setAdvanceable(true);
-			lv.playLevel1(step);
-			step = "step4";
-		}
+		lv.playLevel1("pwd");
 		String path = "";
 
 		// first use of a do-while loop, I'm so proud!
@@ -264,11 +258,7 @@ public class CommandStream implements ActionListener {
 	}
 
 	public void ls(JTextField input, JTextArea output, boolean a) {
-		if(step.equals("step1")) {
-			lv.setAdvanceable(true);
-			lv.playLevel1(step);
-			step = "step2";
-		}
+		lv.playLevel1("ls");
 		for (Directory dir : currentDirectory.getSubDirs()) {
 			output.append(dir.name() + "\n");
 		}
@@ -291,10 +281,7 @@ public class CommandStream implements ActionListener {
 
 			// second check: is the cd argument ..?
 			if (location.equals("..")) {
-				if(step.equals("step2")) {
-					lv.playLevel1(step);
-					step = "step3";
-				}
+				lv.playLevel1("cd");
 				if (currentDirectory.getParent() != null) {
 					prevDir = currentDirectory;
 					currentDirectory = currentDirectory.getParent();
@@ -309,14 +296,14 @@ public class CommandStream implements ActionListener {
 				input.setText("");
 				output.append("Current working directory is now " + currentDirectory.name() + "\n");
 			} else if(location.equals("-")) {
-				
+
 				Directory temp = currentDirectory;
 				currentDirectory = prevDir;
 				prevDir = temp;
 				input.setText("");
 				output.append("Current working directory is now " + currentDirectory.name() + "\n");
 			} else {
-				
+
 				for(Directory dr : currentDirectory.getSubDirs()) {
 					if(dr.name().equals(location)) {
 						prevDir = currentDirectory;
@@ -326,13 +313,13 @@ public class CommandStream implements ActionListener {
 						return;
 					}
 				}
-				
+
 				Directory d = validateFilePath(location.split("/"));
 				if(d == null) {
 					output.append("Invalid file path.\n");
 					return;
 				}
-				
+
 				prevDir = currentDirectory;
 				currentDirectory = d;
 				input.setText("");
@@ -415,7 +402,7 @@ public class CommandStream implements ActionListener {
 
 		return dir;
 	}
-	
+
 	protected void setStartingDir(Directory d) {
 		currentDirectory = d;
 	}
