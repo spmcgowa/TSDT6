@@ -7,7 +7,7 @@ import java.util.Scanner;
 import java.util.ArrayList;
 
 public class CommandStream implements ActionListener {
-
+	//Test String
 	JTextField input;
 	JTextArea output;
 	Directory currentDirectory;
