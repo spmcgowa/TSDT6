@@ -14,6 +14,16 @@ public class Directory {
 		this.files = files;
 	}
 	
+	public String getPath() {
+		String ret = "";
+		Directory c = this;
+		while (c != null) {
+			ret = c.name + "/" + ret;
+			c = c.parent;
+		}
+		return ret;
+	}
+	
 	public ArrayList<Directory> getSubDirs() {
 		return subDirectories;
 	}
