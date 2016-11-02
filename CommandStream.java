@@ -341,7 +341,8 @@ public class CommandStream implements ActionListener {
 			
 			File file = findFile(fileName, currentDirectory);
 			if (file == null) {
-				return new TerminalError("File " + fileName + " not found!\n");
+				file = new File(fileName, "");
+				currentDirectory.addFile(file);
 			}
 			
 			input.setText("");
