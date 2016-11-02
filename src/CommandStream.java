@@ -2,8 +2,6 @@ import java.awt.event.*;
 
 import javax.swing.*;
 
-import java.util.Scanner;
-
 import java.util.ArrayList;
 
 public class CommandStream implements ActionListener {
@@ -141,7 +139,7 @@ public class CommandStream implements ActionListener {
 	public SearchResults validateFilePath(String path) {
 		//We know the current directory, it is part of the command stream
 		String[] tokens = path.split("/");
-		SearchResults searchR = new SearchResults();
+		SearchResults searchR = new SearchResults(); // Create our class to stuff information into!
 		Directory cDir = currentDirectory;
 		for (int i = 0; i < tokens.length; i++) {
 			
@@ -169,7 +167,7 @@ public class CommandStream implements ActionListener {
 						cDir = d;
 						searchR.lastFoundDir = d;
 						found = true;
-						break;
+						break; // THIS BREAKS THE FOR LOOP!
 					}
 				}
 				if (found == false) {
@@ -177,10 +175,13 @@ public class CommandStream implements ActionListener {
 						// We ended with an unknown directory/file
 						searchR.endsWithFile = true;
 						searchR.lastToken = tokens[i];
+						
+						break;
 					}
 					else {
 						//UhOh, our path is wrong!
 						searchR.validPath = false;
+						break;
 					}
 				}
 			}
@@ -234,7 +235,7 @@ public class CommandStream implements ActionListener {
 	public TerminalError clear(Command command) {
 		output.setText(""); // Special for clear, do not change to sendOutput()
 		return null;
-	}
+	}//End Method
 	
 	
 	//-----------------------------------------------------------
@@ -297,7 +298,7 @@ public class CommandStream implements ActionListener {
 		input.setText("");
 		
 		return null;
-	}
+	}//End Method
 
 	//-----------------------------------------------------------
 	// Command: cp
@@ -338,7 +339,7 @@ public class CommandStream implements ActionListener {
 				+ results.lastFoundDir.name() + "\n");
 		
 		return null;
-	}
+	}//End Method
 
 	
 	//-----------------------------------------------------------
@@ -371,7 +372,7 @@ public class CommandStream implements ActionListener {
 		nanoFile = file;
 		
 		return null;
-	}
+	}//End Method
 
 	
 	//-----------------------------------------------------------
@@ -389,7 +390,7 @@ public class CommandStream implements ActionListener {
 		sendOutput(path + "\n");
 		
 		return null;
-	}
+	}//End Method
 
 	//-----------------------------------------------------------
 	// Command: ls
@@ -401,13 +402,16 @@ public class CommandStream implements ActionListener {
 			// -a
 				// Listing includes normally hidden files
 	//-----------------------------------------------------------
-	public TerminalError ls(Command command) {		
+	public TerminalError ls(Command command) {
 		if (currentDirectory == null) {
 			System.out.println("NO CURRENT DIRECTORY!");
 		}
+		
+		
 		for (Directory dir : currentDirectory.getSubDirs()) {
 			sendOutput(dir.name() + "\n");
 		}
+		
 		for (File file : currentDirectory.getFiles()) {
 			if (command.getFlags().size() == 1 && command.getFlags().get(0).equals("-a")) {
 				sendOutput(file.getName() + "\n");
@@ -418,7 +422,7 @@ public class CommandStream implements ActionListener {
 			}
 		}
 		return null;
-	}
+	}//End Method
 
 	//-----------------------------------------------------------
 	// Command: cd
@@ -435,14 +439,17 @@ public class CommandStream implements ActionListener {
 		}
 		String path = command.getInputs().get(0);
 		SearchResults results = validateFilePath(path);
-		if (results.validPath) {
+		if (results.validPath == true) {
+			if (results.endsWithFile) {
+				return new TerminalError(results.lastToken + " is not a valid directory.");
+			}
 			setCurrentDirectory(results.lastFoundDir);
 		}
 		else {
 			return new TerminalError("Invalid File Path");
 		}
 		return null;
-	} // end method
+	} //End Method
 
 	
 	//-----------------------------------------------------------
@@ -454,36 +461,46 @@ public class CommandStream implements ActionListener {
 		// Flags
 			// None
 	//-----------------------------------------------------------
-	//[TODO] This does not currently use file paths correctly
 	public TerminalError cat(Command command) {
 		if (command.getInputs().size() < 1) {
 			return new TerminalError("Not enough Arguments.\n");
 		}
-		String fileName = command.getInputs().get(0);
 		
-		File file = findFile(fileName, currentDirectory);
+		String filePath = command.getInputs().get(0);
+		SearchResults results = validateFilePath(filePath);
+		
+		if (results.validPath == false) {
+			return new TerminalError("Invalid File Path.");
+		}
+		
+		File file = findFile(results.lastToken, results.lastFoundDir);		
+		if (results.endsWithFile == false) {
+			return new TerminalError( results.lastToken + " is a Directory.");
+		}
+		
 		if (file == null) {
 			return new TerminalError("No such file.\n");
 		}
 		sendOutput(file.getContents() + "\n");
 		
 		return null;
-	}
+	} //End Method
 
 	
 	//-----------------------------------------------------------
 	// Command: exit
-			// Description: Exits the game! [TODO] Probably should confirm with player since this is a game? Or trigger a save?
+			// Description: Exits the game! 
 		// Input
 			// Required: None
 			// Optional: None
 		// Flags
 			// None
 	//-----------------------------------------------------------
+	//[TODO] Probably should confirm with player since this is a game? Or trigger a save?
 	public TerminalError exit() {
 		System.exit(0);
-		return null;
-	}
+		return new TerminalError("Closing Console!");
+	}//End Method
 
 	// End block of Command Methods
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------

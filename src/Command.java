@@ -13,6 +13,8 @@ public class Command {
 		return ret;
 	}
 
+	//[TODO] Currently does not start a new command if the ; or && touching another block.
+			//Might want to switch to doing split on ; and && to break everything up first?
 	public static ArrayList<Command> GenerateCommands(String input) {
 		Scanner read = new Scanner(input);
 		String[] validCommands = new String[] {"mv","ls","exit","clear","cd","cat","pwd","cp","chmod","ssh","nano","scp"};
@@ -47,6 +49,11 @@ public class Command {
 					newComm = null;
 				}
 				else {
+					boolean endIt = false;
+					if (token.charAt(token.length()-1) == ';') {
+						token = token.substring(0, token.length()-1);
+						endIt = true;						
+					}
 					if (token.charAt(0) == '-') {
 						//This is a flag
 						//[TODO] Check to see if something is after the dash, no spaces.
@@ -56,6 +63,7 @@ public class Command {
 						//this is some other form of input. ?
 						newComm.addInput(token);
 					}
+					if (endIt) newComm = null;
 				}	
 			}
 		}
