@@ -64,6 +64,7 @@ public class CommandStream implements ActionListener {
 			}
 			
 			if (command.getCommand().equals("mv")) {
+				error = mv(command);
 			} else if (command.getCommand().equals("ls")) {
 				error = ls(command);
 			} else if (command.getCommand().equals("exit")) {
@@ -81,7 +82,6 @@ public class CommandStream implements ActionListener {
 			} else if (command.getCommand().equals("nano")) {
 				error = nano(command);
 			}
-			
 			
 			//Handle Errors!
 			if (error != null)  {
@@ -276,8 +276,9 @@ public class CommandStream implements ActionListener {
 		}
 
 		// mv can be used to rename, this takes care of that
-		String newFileName = results.lastToken;
-
+		String newFileName = fileName;
+		if (results.endsWithFile) newFileName = results.lastToken;
+		
 		// this for-each loop looks for a directory with the same name as the
 		// file and overwrites it with the file if so,
 		// just like actual Linux
@@ -290,6 +291,7 @@ public class CommandStream implements ActionListener {
 
 		// this updates the file's name and adds it to the appropriate directory
 		file.setName(newFileName);
+		System.out.println("Woo");
 		results.lastFoundDir.addFile(file);
 		
 		input.setText("");
@@ -355,18 +357,18 @@ public class CommandStream implements ActionListener {
 		
 		String fileName = command.getInputs().get(0);
 		
-		File f = findFile(fileName, currentDirectory);
-		if (f == null) {
-			return new TerminalError("File " + f + " not found!\n");
+		File file = findFile(fileName, currentDirectory);
+		if (file == null) {
+			return new TerminalError("File " + fileName + " not found!\n");
 		}
 		
 		input.setText("");
-		output.setText(f.getContents());
+		output.setText(file.getContents());
 		input.setEditable(false);
 		output.setEditable(true);
 		output.requestFocus();
 		buttons.setVisible(true);
-		nanoFile = f;
+		nanoFile = file;
 		
 		return null;
 	}

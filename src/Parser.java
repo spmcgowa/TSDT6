@@ -139,7 +139,7 @@ public class Parser {
 		city.addDirectory(home);
 		
 		Directory airport = new Directory("Airport", city, new ArrayList<Directory>(), new ArrayList<File>());
-		airport.addFile(new File("Luggage.txt", ""));
+		airport.addFile(new File("Luggage.txt", "Clothes, Flashlight, Adventuring Rope, and a Slice of Blueberry Pie."));
 		city.addDirectory(airport);
 		
 		Directory baggage = new Directory("BaggageCheck", airport, new ArrayList<Directory>(), new ArrayList<File>());
