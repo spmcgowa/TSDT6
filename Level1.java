@@ -27,9 +27,6 @@ public class Level1 {
 		if(stepCount == 0) {
 			output.setText("While doing research in the library, Dr. [you] finds a treasure map tucked away in the stacks.<br>It appears to lead to [insert cool location here] that contains relics that belong<br>in a museum.  Let's go on an adventure!<br>Enter a blank command (press [Enter] with nothing in the terminal) to advance the dialogue.");
 			stepCount++;
-		} else if(command.equals("ls") && stepCount == 2) {
-			output.setText("In Linux, the ls command lists files and other directories in your current working directory.<br>[Enter]");
-			stepCount++;
 		} else if(command.equals("pwd") && stepCount == 5) {
 			output.setText("pwd works like a compass to help us get our bearings in the system.<br>Each slash represents a directory level. /library is to the right of /city, so that tells us the library is in the city.<br>[Enter]");
 			stepCount++;
@@ -52,23 +49,50 @@ public class Level1 {
 				} else if(location.name().equals("Egypt")) {
 					output.setText("From the airport you can get to Giza or Alexandria. Type cd Giza to get to Giza.");
 				}
+			} else if(stepCount == 28 && location.name().equals(".PyramidOfHeket")) {
+				output.setText("Looks like the pyramid is sealed shut, but that slab looks suspiciously like a door.<br>In Linux, in addition to moving files, the mv command can rename files.<br>The format for this is mv [filename] [new filename]. You can find the original file name<br>for the slab with ls.");
+				stepCount++;
+			} else if(stepCount == 33) {
+				if(location.name().equals("GrandGallery")) {
+					
+				} else if(location.name().equals("HypostyleHall")) {
+					
+				}
 			}
 		} else if(command.equals("ls")) {
-			if(stepCount == 10) {
+			if(stepCount == 2) {
+				output.setText("In Linux, the ls command lists files and other directories in your current working directory.<br>[Enter]");
+				stepCount++;
+			} else if(stepCount == 10) {
 				output.setText("You can move into listed sub-directories in the<br>city by using the cd command again.<br>By typing cd <directory name> you can move directly to that directory.<br>So to get to the airport, type cd Airport.");
 				stepCount++;
 			} else if(stepCount == 22) {
 				output.setText("Huh. Looks like your luggage was lost. Guess it'll show up eventually.<br>From the airport you can get to Giza or Alexandria.");
 				stepCount++;
 			} else if(stepCount == 25) {
-				output.setText("");
+				output.setText("Hmm. Nothing new showed up, but looking at the map in the sun, it looks like there's some<br> kind of invisible ink...<br>[Enter]");
+				stepCount++;
+			} else if(stepCount == 27 && location.name().equals("Giza")) {
+				output.setText("Most pyramids are burial chambers for pharaohs, but Heket was the Goddess of Frogs.<br>This definitely seems worth further exploration.");
+				stepCount++;
+			} else if(stepCount == 29) {
+				output.setText("To turn the slab into a door, use the mv command: mv slab.txt door.txt");
+				stepCount++;
+			} else if(stepCount == 31) {
+				output.setText("Use cd to move to a room.");
+				stepCount++;
 			}
 		} else if(stepCount == 12) {
 			output.setText("To move files, Linux uses the mv command.");
 			stepCount++;
-		} else if(command.equals("mv") && stepCount == 15) {
-			output.setText("Now we can head to Egypt using the cd command.");
-			stepCount++;
+		} else if(command.equals("mv")) {
+			if(stepCount == 15) {
+				output.setText("Now we can head to Egypt using the cd command.");
+				stepCount++;
+			} else if(stepCount == 30) {
+				output.setText("That did the trick! Now the map will show pyramid rooms.");
+				stepCount++;
+			}
 		} else if(command.equals("clear") && stepCount == 17) {
 			output.setText("Great! Now let's see if you can take the red-eye to Egypt.");
 			stepCount++;
@@ -116,8 +140,15 @@ public class Level1 {
 					output.setText("Type cd - to return to your previous working directory.");
 				}
 			} else if(stepCount == 24) {
-				output.setText("Finally made it to Giza. Now to find that <insert same cool location here>.<br>Try the ls command to pull up the map and see what's here.");
+				output.setText("Finally made it to Giza. Now to find that [insert same cool location here].<br>Try the ls command to pull up the map and see what's here.");
 				stepCount++;
+			} else if(stepCount == 26) {
+				output.setText("In Linux, .[name] files don't show up with a normal ls command. To see everything in a directory, type ls -a.");
+				stepCount++;
+			} else if(stepCount == 31) {
+				output.setText("Type ls to open the map.");
+			} else if(stepCount == 32) {
+				output.setText("The GrandGallery and HypostyleHall are the subdirectories in HeketsPyramid.<br>They can be opened with the cd [directory name] command.<br>If you want to explore the GrandGallery, type cd GrandGallery.<br>If you want to explore the HypostyleHall, type cd HypostyleHall.");
 			}
 		}
 	}
