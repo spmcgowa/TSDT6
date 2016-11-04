@@ -25,29 +25,29 @@ public class Level1 {
 	
 	public void playLevel1(String command) {
 		if(stepCount == 0) {
-			output.setText("While doing research in the library, Dr. [you] finds a treasure map tucked away in the stacks.<br>It appears to lead to [insert cool location here] that contains relics that belong<br>in a museum.  Let's go on an adventure!");
+			output.setText("While doing research in the library, Dr. [you] finds a treasure map tucked away in the stacks.<br>It appears to lead to [insert cool location here] that contains relics that belong<br>in a museum.  Let's go on an adventure!<br>Enter a blank command (press [Enter] with nothing in the terminal) to advance the dialogue.");
 			stepCount++;
 		} else if(command.equals("ls") && stepCount == 2) {
-			output.setText("In Linux, the ls command lists files and other directories in your current working directory");
+			output.setText("In Linux, the ls command lists files and other directories in your current working directory.<br>[Enter]");
 			stepCount++;
 		} else if(command.equals("pwd") && stepCount == 5) {
-			output.setText("pwd works like a compass to help us get our bearings in the system.<br>Each slash represents a directory level. /library is to the right of /city, so that tells us the library is in the city.");
+			output.setText("pwd works like a compass to help us get our bearings in the system.<br>Each slash represents a directory level. /library is to the right of /city, so that tells us the library is in the city.<br>[Enter]");
 			stepCount++;
 		} else if(command.equals("cd")) {
 			if(stepCount == 8) {
 				stepCount++;
-				output.setText("The map says the <insert same cool location here> is in Giza.  That's<br>way too far for a penguin to fly, so let's go to the airport.");
+				output.setText("The map says the [insert same cool location here] is in Giza.  That's<br>way too far for a penguin to fly, so let's go to the airport.<br>[Enter]");
 			} else if(stepCount == 19) {
-				output.setText("Thank goodness for time-saving montages. That felt way shorter than 15 hours.");
+				output.setText("Thank goodness for time-saving montages. That felt way shorter than 15 hours.[Enter]");
 				stepCount++;
 			} else if(stepCount == 11) {
-				output.setText("Before we take off, let's get our baggage to the baggage check.");
+				output.setText("Before we take off, let's get our baggage to the baggage check.[Enter]");
 				stepCount++;
 			} else if(stepCount == 23) {
 				if(location.name().equals("Alexandria")) {
 					output.setText("Whoops. Took a wrong turn. In Linux, to get back to<br>your previous working directory, use the command cd -");
 				} else if(location.name().equals("Giza")) {
-					output.setText("Finally made it to Giza, now to find that <insert same cool location here> your research uncovered.<br>Try the ls command to pull up the map and see what's here.");
+					output.setText("Finally made it to Giza, now to find that [insert same cool location here] your research uncovered.<br>Try the ls command to pull up the map and see what's here.");
 					stepCount++;
 				} else if(location.name().equals("Egypt")) {
 					output.setText("From the airport you can get to Giza or Alexandria. Type cd Giza to get to Giza.");
