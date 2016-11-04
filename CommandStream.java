@@ -51,8 +51,24 @@ public class CommandStream implements ActionListener {
 			return;
 		}
 
-		// this retrieves the text from the input field
 		String text = input.getText();
+		
+		//-----------------------------------------------------------------
+		//Dev Mode
+				
+		Scanner temp = new Scanner(text);
+		
+		if(temp.hasNext()) {
+			if(temp.next().equals("setstage")) {
+				lv.devMode(Integer.parseInt(temp.next()));
+			}
+		}		
+		temp.close();
+				
+		//-----------------------------------------------------------------
+				
+		
+		// this retrieves the text from the input field
 		input.setText("");
 		ArrayList<Command> commands = Command.GenerateCommands(text);
 		TerminalError error = null;
@@ -158,18 +174,31 @@ public class CommandStream implements ActionListener {
 			} else if(("..").equals(tokens[i])) {
 				if(cDir != root) {
 					if(cDir.parent == null) {
-						throw new NullPointerException();
+						throw new NullPointerException("Directory has no parent!");
 					} else if(cDir == cDir.parent) {
-						throw new IllegalArgumentException();
+						throw new IllegalArgumentException("Directory is its own parent!?");
 					}
-					cDir = cDir.parent;
+					prevDir = cDir;
+					currentDirectory = cDir.parent;
+					cDir = currentDirectory;
+				}
+			} else if(("-").equals(tokens[i])) {
+				if(prevDir == null) {
+					output.append("No previous directory available.");
+				} else {
+					Directory temp = currentDirectory;
+					currentDirectory = prevDir;
+					prevDir = temp;
+					cDir = currentDirectory;
 				}
 			} else {
 				boolean found = false;
 				for(Directory d : cDir.getSubDirs()) {
 					if(d.name().equals(tokens[i])) {
+						prevDir = cDir;
+						currentDirectory = d;
+						//searchR.lastFoundDir = d;
 						cDir = d;
-						searchR.lastFoundDir = d;
 						found = true;
 						break;  //THIS BREAKS THE FOR LOOP! FRRRREEEEEDOM!
 					}

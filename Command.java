@@ -54,7 +54,7 @@ public class Command {
 						token = token.substring(0, token.length()-1);
 						endIt = true;						
 					}
-					if (token.charAt(0) == '-') {
+					if (token.charAt(0) == '-' && token.length() > 1) {
 						//This is a flag
 						//[TODO] Check to see if something is after the dash, no spaces.
 						newComm.addFlag(token);

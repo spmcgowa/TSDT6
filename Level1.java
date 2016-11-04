@@ -110,7 +110,11 @@ public class Level1 {
 				output.setText("Finding Giza works the same way as flying to Egypt from the airport.<br>Type ls to pull up the map and see what places there are to go.");
 				stepCount++;
 			} else if(stepCount == 23) {
-				output.setText("Type cd Giza to go to Giza.");
+				if(location.equals("Egypt")) {
+					output.setText("Type cd Giza to go to Giza.");
+				} else if(location.equals("Alexandria")) {
+					output.setText("Type cd - to return to your previous working directory.");
+				}
 			} else if(stepCount == 24) {
 				output.setText("Finally made it to Giza. Now to find that <insert same cool location here>.<br>Try the ls command to pull up the map and see what's here.");
 				stepCount++;
@@ -120,5 +124,9 @@ public class Level1 {
 	
 	protected void setLocation(Directory d) {
 		location = d;
+	}
+	
+	protected void devMode(int n) {
+		stepCount = n;
 	}
 }
