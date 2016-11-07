@@ -172,7 +172,7 @@ public class Command {
 	
 	//constructor
 	public Command() {
-		command = "DefaultCommand";
+		command = "";
 		flags = new ArrayList<String>();
 		inputs = new ArrayList<String>();
 		error = null;

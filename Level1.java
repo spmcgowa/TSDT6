@@ -1,4 +1,5 @@
 import java.awt.Dimension;
+import java.util.ArrayList;
 
 import javax.swing.*;
 
@@ -13,6 +14,16 @@ public class Level1 {
 	int stepCount;
 	Directory location;
 	
+	Directory cat;
+	Directory apep;
+	Directory ra;
+	Directory snake;
+	
+	File dotFeline;
+	File apepp;
+	File rra;
+	File serpent;
+	
 	public Level1(String step, JTextPane output) {
 		this.step = step;
 		this.output = output;
@@ -23,7 +34,19 @@ public class Level1 {
 		output.setPreferredSize(new Dimension(200, 200));
 	}
 	
-	public void playLevel1(String command) {
+	public boolean playLevel1(Command cmd) {
+		String command = cmd.getCommand();
+		if(stepCount == 34) {
+			if(command.equals("cp")) {
+				//check for copy .feline.txt and update the
+				//reference to dotFeline
+			}
+			if(checkWinCons()) {
+				System.out.println("You were able to successfully loot the treasure room of Heket! Let's hope that a terrible curse\ndoesn't follow...");
+				return true;
+				//System.exit(0);
+			}
+		}
 		if(stepCount == 0) {
 			output.setText("While doing research in the library, Dr. [you] finds a treasure map tucked away in the stacks.<br>It appears to lead to [insert cool location here] that contains relics that belong<br>in a museum.  Let's go on an adventure!<br>Enter a blank command (press [Enter] with nothing in the terminal) to advance the dialogue.");
 			stepCount++;
@@ -53,11 +76,8 @@ public class Level1 {
 				output.setText("Looks like the pyramid is sealed shut, but that slab looks suspiciously like a door.<br>In Linux, in addition to moving files, the mv command can rename files.<br>The format for this is mv [filename] [new filename]. You can find the original file name<br>for the slab with ls.");
 				stepCount++;
 			} else if(stepCount == 33) {
-				if(location.name().equals("GrandGallery")) {
-					
-				} else if(location.name().equals("HypostyleHall")) {
-					
-				}
+				output.setText("Remember what you've learned.  Use this knowledge well, and the temple will yield its secrets!");
+				stepCount++;
 			}
 		} else if(command.equals("ls")) {
 			if(stepCount == 2) {
@@ -151,6 +171,7 @@ public class Level1 {
 				output.setText("The GrandGallery and HypostyleHall are the subdirectories in HeketsPyramid.<br>They can be opened with the cd [directory name] command.<br>If you want to explore the GrandGallery, type cd GrandGallery.<br>If you want to explore the HypostyleHall, type cd HypostyleHall.");
 			}
 		}
+		return false;
 	}
 	
 	protected void setLocation(Directory d) {
@@ -159,5 +180,84 @@ public class Level1 {
 	
 	protected void devMode(int n) {
 		stepCount = n;
+	}
+	
+	protected Directory buildLevel(Directory root) {
+		Directory lv1 = new Directory("Level1", root, new ArrayList<Directory>(), new ArrayList<File>());
+		Directory city = new Directory("City", lv1, new ArrayList<Directory>(), new ArrayList<File>());
+		lv1.addDirectory(city);
+		
+		Directory library = new Directory("Library", city, new ArrayList<Directory>(), new ArrayList<File>());
+		city.addDirectory(library);
+		library.addFile(new File("archaeology.txt", ""));
+		library.addFile(new File("HowToLinux.txt", ""));
+		library.addFile(new File("heket.txt", ""));
+		library.addFile(new File("frogs.txt", ""));
+		
+		Directory home = new Directory("Home", city, new ArrayList<Directory>(), new ArrayList<File>());
+		city.addDirectory(home);
+		
+		Directory airport = new Directory("Airport", city, new ArrayList<Directory>(), new ArrayList<File>());
+		airport.addFile(new File("Luggage.txt", ""));
+		city.addDirectory(airport);
+		
+		Directory baggage = new Directory("BaggageCheck", airport, new ArrayList<Directory>(), new ArrayList<File>());
+		Directory egypt = new Directory("Egypt", airport, new ArrayList<Directory>(), new ArrayList<File>());
+		Directory giza = new Directory("Giza", egypt, new ArrayList<Directory>(), new ArrayList<File>());
+		Directory alexandria = new Directory("Alexandria", egypt, new ArrayList<Directory>(), new ArrayList<File>());
+		Directory minnesota = new Directory("Minnesota", airport, new ArrayList<Directory>(), new ArrayList<File>());
+		Directory bathroom = new Directory("Bathrooms", airport, new ArrayList<Directory>(), new ArrayList<File>());
+		
+		airport.addDirectory(minnesota);
+		airport.addDirectory(bathroom);
+		airport.addDirectory(baggage);
+		airport.addDirectory(egypt);
+		egypt.addDirectory(giza);
+		egypt.addDirectory(alexandria);
+		
+		Directory pyramid1 = new Directory("PyramidOofMenKaure", giza, new ArrayList<Directory>(), new ArrayList<File>());
+		Directory pyramid2 = new Directory("PyramidOfKhafre", giza, new ArrayList<Directory>(), new ArrayList<File>());
+		Directory pyramid3 = new Directory("PyramidOfKhufu", giza, new ArrayList<Directory>(), new ArrayList<File>());
+		Directory pyramid4 = new Directory(".PyramidOfHeket", giza, new ArrayList<Directory>(), new ArrayList<File>());
+		
+		giza.addDirectory(pyramid1);
+		giza.addDirectory(pyramid2);
+		giza.addDirectory(pyramid3);
+		giza.addDirectory(pyramid4);
+		
+		pyramid4.addFile(new File("slab.txt", ""));
+		Directory gg = new Directory("GrandGallery", pyramid4, new ArrayList<Directory>(), new ArrayList<File>());
+		Directory hh = new Directory("HypostyleHall", pyramid4, new ArrayList<Directory>(), new ArrayList<File>());
+		pyramid4.addDirectory(gg);
+		pyramid4.addDirectory(hh);
+		
+		dotFeline = new File(".feline.txt", "");
+		serpent = new File("Serpent.txt", "");
+		rra = new File("Ra.txt", "");
+		apepp = new File("Apep.txt", "");
+		
+		gg.addFile(dotFeline);
+		hh.addFile(serpent);
+		hh.addFile(rra);
+		hh.addFile(apepp);
+		
+		cat = new Directory("Cat", hh, new ArrayList<Directory>(), new ArrayList<File>());
+		snake = new Directory("Snake", hh, new ArrayList<Directory>(), new ArrayList<File>());
+		ra = new Directory("Ra", hh,  new ArrayList<Directory>(), new ArrayList<File>());
+		apep = new Directory("Apep", hh, new ArrayList<Directory>(), new ArrayList<File>());
+		
+		hh.addDirectory(cat);
+		hh.addDirectory(snake);
+		hh.addDirectory(ra);
+		hh.addDirectory(apep);
+		
+		
+		
+		return library;
+	}
+	
+	private boolean checkWinCons() {
+		//if(cat.contains(""))
+		return false;
 	}
 }

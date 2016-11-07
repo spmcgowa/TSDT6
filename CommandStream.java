@@ -28,8 +28,9 @@ public class CommandStream implements ActionListener {
 		nanoFile = null;
 		prevDir = null;
 		lv = new Level1(step, graphicsTextOutput);
+		currentDirectory = lv.buildLevel(root);
 		lv.setLocation(currentDirectory);
-		lv.playLevel1(step);
+		//lv.playLevel1(step);
 		step = "step1";
 	}
 
@@ -107,7 +108,9 @@ public class CommandStream implements ActionListener {
 			}
 			
 			if(commands != null) {
-				lv.playLevel1(command.getCommand());
+				if(lv.playLevel1(command)) {
+					//build level 2
+				}
 			}
 		} //End for loop!
 		
@@ -118,7 +121,9 @@ public class CommandStream implements ActionListener {
 		}
 		*/
 		if(text.equals("")) {
-			lv.playLevel1("");
+			if(lv.playLevel1(new Command())) {
+				//build level 2
+			}
 		}
 	}
 

@@ -15,7 +15,7 @@ public class Parser {
 	public static void main(String[] args) {
 		
 		Parser p = new Parser();
-		Directory startingDir = p.buildLvls(p.root);
+		//Directory startingDir = p.buildLvls(p.root);
 
 		final double SCREEN_X = Toolkit.getDefaultToolkit().getScreenSize().getWidth();
 		final double SCREEN_Y = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
@@ -113,7 +113,7 @@ public class Parser {
 		//this sets up a listener and adds it to the input box, allowing for the input
 		//to be processed when the user presses [ENTER]
 		CommandStream cs = new CommandStream(input, output, p.root, p.root, buttons, "", storyOutput);
-		cs.setStartingDir(startingDir);
+		//cs.setStartingDir(startingDir);
 		input.addActionListener(cs);
 		save.addActionListener(cs);
 		exit.addActionListener(cs);
@@ -124,7 +124,6 @@ public class Parser {
 	/**
 	 * This method constructs the basic file structure of a simulated linux system
 	 * @return a reference to the root directory
-	 */
 	private Directory buildLvls(Directory root) {
 		Directory lv1 = new Directory("Level1", root, new ArrayList<Directory>(), new ArrayList<File>());
 		//Directory lv2 = new Directory("Level2", root, new ArrayList<Directory>(), new ArrayList<File>());
@@ -132,68 +131,6 @@ public class Parser {
 		//root.addDirectory(lv2);
 		return buildLv1(lv1);
 	}
-
-	private Directory buildLv1(Directory lv1) {
-		Directory city = new Directory("City", lv1, new ArrayList<Directory>(), new ArrayList<File>());
-		lv1.addDirectory(city);
-		
-		Directory library = new Directory("Library", city, new ArrayList<Directory>(), new ArrayList<File>());
-		city.addDirectory(library);
-		library.addFile(new File("archaeology.txt", ""));
-		library.addFile(new File("HowToLinux.txt", ""));
-		library.addFile(new File("heket.txt", ""));
-		library.addFile(new File("frogs.txt", ""));
-		
-		Directory home = new Directory("Home", city, new ArrayList<Directory>(), new ArrayList<File>());
-		city.addDirectory(home);
-		
-		Directory airport = new Directory("Airport", city, new ArrayList<Directory>(), new ArrayList<File>());
-		airport.addFile(new File("Luggage.txt", ""));
-		city.addDirectory(airport);
-		
-		Directory baggage = new Directory("BaggageCheck", airport, new ArrayList<Directory>(), new ArrayList<File>());
-		Directory egypt = new Directory("Egypt", airport, new ArrayList<Directory>(), new ArrayList<File>());
-		Directory giza = new Directory("Giza", egypt, new ArrayList<Directory>(), new ArrayList<File>());
-		Directory alexandria = new Directory("Alexandria", egypt, new ArrayList<Directory>(), new ArrayList<File>());
-		Directory minnesota = new Directory("Minnesota", airport, new ArrayList<Directory>(), new ArrayList<File>());
-		Directory bathroom = new Directory("Bathrooms", airport, new ArrayList<Directory>(), new ArrayList<File>());
-		
-		airport.addDirectory(minnesota);
-		airport.addDirectory(bathroom);
-		airport.addDirectory(baggage);
-		airport.addDirectory(egypt);
-		egypt.addDirectory(giza);
-		egypt.addDirectory(alexandria);
-		
-		Directory pyramid1 = new Directory("PyramidOofMenKaure", giza, new ArrayList<Directory>(), new ArrayList<File>());
-		Directory pyramid2 = new Directory("PyramidOfKhafre", giza, new ArrayList<Directory>(), new ArrayList<File>());
-		Directory pyramid3 = new Directory("PyramidOfKhufu", giza, new ArrayList<Directory>(), new ArrayList<File>());
-		Directory pyramid4 = new Directory(".PyramidOfHeket", giza, new ArrayList<Directory>(), new ArrayList<File>());
-		
-		giza.addDirectory(pyramid1);
-		giza.addDirectory(pyramid2);
-		giza.addDirectory(pyramid3);
-		giza.addDirectory(pyramid4);
-		
-		pyramid4.addFile(new File("slab.txt", ""));
-		Directory gg = new Directory("GrandGallery", pyramid4, new ArrayList<Directory>(), new ArrayList<File>());
-		Directory hh = new Directory("HypostyleHall", pyramid4, new ArrayList<Directory>(), new ArrayList<File>());
-		pyramid4.addDirectory(gg);
-		pyramid4.addDirectory(hh);
-		
-		gg.addFile(new File(".feline.txt", ""));
-		hh.addFile(new File("Serpent.txt", ""));
-		hh.addFile(new File("Ra.txt", ""));
-		hh.addFile(new File("Apep.txt", ""));
-		
-		hh.addDirectory(new Directory("Cat", hh, new ArrayList<Directory>(), new ArrayList<File>()));
-		hh.addDirectory(new Directory("Snake", hh, new ArrayList<Directory>(), new ArrayList<File>()));
-		hh.addDirectory(new Directory("Ra", hh,  new ArrayList<Directory>(), new ArrayList<File>()));
-		hh.addDirectory(new Directory("Apep", hh, new ArrayList<Directory>(), new ArrayList<File>()));
-		
-		
-		
-		return library;
-	}
+	*/
 
 }
