@@ -14,9 +14,13 @@ public class CommandStream implements ActionListener {
 	File nanoFile;
 	Directory prevDir;
 	final Directory root;
-	String step = "step0";
 	Level1 lv;
+	Level2 lv2;
+	Level3 lv3;
+	Level4 lv4;
+	Level5 lv5;
 	boolean storyReadyToAdvance = true;
+	int currentLevel;
 
 	public CommandStream(JTextField input, JTextArea output, Directory cd,
 			Directory root, JPanel buttons, String lv1, JTextPane graphicsTextOutput) {
@@ -27,11 +31,11 @@ public class CommandStream implements ActionListener {
 		this.buttons = buttons;
 		nanoFile = null;
 		prevDir = null;
-		lv = new Level1(step, graphicsTextOutput);
+		lv = new Level1(graphicsTextOutput);
 		currentDirectory = lv.buildLevel(root);
 		lv.setLocation(currentDirectory);
-		//lv.playLevel1(step);
-		step = "step1";
+		lv.playLevel1(new Command());
+		currentLevel = 1;
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -108,21 +112,23 @@ public class CommandStream implements ActionListener {
 			}
 			
 			if(commands != null) {
-				if(lv.playLevel1(command)) {
-					//build level 2
+				if(currentLevel == 1) {
+					if(lv.playLevel1(command)) {
+						lv2 = new Level2();
+						currentLevel = 2;
+					}
+				} else if(currentLevel == 2) {
+					
 				}
 			}
 		} //End for loop!
 		
-		/*
-		//TODO: examine to see if this will propely advance gameplay
-		if(commands != null) {
-			lv.playLevel1(text);
-		}
-		*/
 		if(text.equals("")) {
-			if(lv.playLevel1(new Command())) {
-				//build level 2
+			if(currentLevel == 1) {
+				if(lv.playLevel1(new Command())) {
+					lv2 = new Level2();
+					currentLevel = 2;
+				}
 			}
 		}
 	}
@@ -184,24 +190,22 @@ public class CommandStream implements ActionListener {
 						throw new IllegalArgumentException("Directory is its own parent!?");
 					}
 					prevDir = cDir;
-					currentDirectory = cDir.parent;
-					cDir = currentDirectory;
+					cDir = cDir.parent;
 				}
 			} else if(("-").equals(tokens[i])) {
 				if(prevDir == null) {
 					output.append("No previous directory available.");
 				} else {
-					Directory temp = currentDirectory;
-					currentDirectory = prevDir;
-					prevDir = temp;
-					cDir = currentDirectory;
+					//Directory temp = currentDirectory;
+					cDir = prevDir;
+					prevDir = currentDirectory;
 				}
 			} else {
 				boolean found = false;
 				for(Directory d : cDir.getSubDirs()) {
 					if(d.name().equals(tokens[i])) {
 						prevDir = cDir;
-						currentDirectory = d;
+						cDir = d;
 						//searchR.lastFoundDir = d;
 						cDir = d;
 						found = true;
@@ -424,7 +428,13 @@ public class CommandStream implements ActionListener {
 			
 			
 			for (Directory dir : currentDirectory.getSubDirs()) {
-				sendOutput(dir.name() + "\n");
+				if (command.getFlags().size() == 1 && command.getFlags().get(0).equals("-a")) {
+					sendOutput(dir.name() + "\n");
+				} else {
+					if (dir.name().charAt(0) != '.') {
+						sendOutput(dir.name() + "\n");
+					}
+				}
 			}
 			
 			for (File file : currentDirectory.getFiles()) {
