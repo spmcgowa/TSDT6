@@ -74,7 +74,6 @@ public class CommandStream implements ActionListener {
 				
 		
 		// this retrieves the text from the input field
-		input.setText("");
 		ArrayList<Command> commands = Command.GenerateCommands(text);
 		TerminalError error = null;
 		//Loop through all commands found and do them in order!
@@ -83,6 +82,7 @@ public class CommandStream implements ActionListener {
 			sendOutput("> " + command.getSimpleString() + "\n");
 			if(command.isErrored()) {
 				invalid(input, output);
+				return;
 			}
 			
 			if (command.getCommand().equals("mv")) {
@@ -103,6 +103,12 @@ public class CommandStream implements ActionListener {
 				error = cp(command);
 			} else if (command.getCommand().equals("nano")) {
 				error = nano(command);
+			} else if (command.getCommand().equals("head")) {
+				error = headTail(command, 1);
+			} else if (command.getCommand().equals("tail")) {
+				error = headTail(command, -1);
+			} else if (command.getCommand().equals("mkdir")) {
+				error = mkdir(command);
 			}
 			
 			//Handle Errors!
@@ -118,7 +124,10 @@ public class CommandStream implements ActionListener {
 						currentLevel = 2;
 					}
 				} else if(currentLevel == 2) {
-					
+					//if(lv2.playLevel2(command)) {
+						//lv3 = new Level3();
+						//currentLevel = 3;
+					//}
 				}
 			}
 		} //End for loop!
@@ -131,13 +140,14 @@ public class CommandStream implements ActionListener {
 				}
 			}
 		}
+		input.setText("");
 	}
 
 	
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------
 	// Block of Helper Methods
 	public void invalid(JTextField input, JTextArea output) {
-		output.append(input.getText() + " is not a valid command.");
+		output.append(input.getText() + " is not a valid command.\n");
 	}
 	
 	// finds a file by name in the current working directory or null if no such
@@ -525,7 +535,53 @@ public class CommandStream implements ActionListener {
 			System.exit(0);
 			return new TerminalError("Closing Console!");
 		}//End Method
+		
+		//-----------------------------------------------------------
+		// Command: head
+				// Description: Prints the first 10 lines of a file to the console
+			// Input
+				// Required: something
+				// Optional: none
+			// Flags
+				// None
+		// ----------------------------------------------------------
+		public TerminalError headTail(Command comm, int arg) {
+			
+			if(comm.getInputs().size() != 1) {
+				return new TerminalError("One argument required!\n");
+			}
+			File f = findFile(comm.getInputs().get(0), currentDirectory);
+			
+			String[] text = f.getContents().split("\n");
+			
+			if(arg < 0) {
+				for(int i = (Math.max(text.length - 10, 0)); i < text.length; i++) {
+					output.append(text[i] + "\n");
+				}
+			} else {
+				for(int i = 0; i < (Math.min(10, text.length)); i++) {
+					output.append(text[i] + "\n");
+				}
+			}
+			
+			return null;
+		}
+		
+		public TerminalError mkdir(Command comm) {
+			
+			if(comm.getInputs().size() != 1) {
+				return new TerminalError("Exactly 1 argument required!");
+			}
+			
+			String dirName = comm.getInputs().get(0);
+			
+			Directory newDir = new Directory(dirName, currentDirectory, new ArrayList<Directory>(), new ArrayList<File>());
+			currentDirectory.addDirectory(newDir);
+			
+			return null;
+		}
 
 		// End block of Command Methods
 		// ----------------------------------------------------------------------------------------------------------------------------------------------------
+		
 }

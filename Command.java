@@ -17,13 +17,13 @@ public class Command {
 			//Might want to switch to doing split on ; and && to break everything up first?
 	public static ArrayList<Command> GenerateCommands(String input) {
 		Scanner read = new Scanner(input);
-		String[] validCommands = new String[] {"mv","ls","exit","clear","cd","cat","pwd","cp","chmod","ssh","nano","scp"};
+		String[] validCommands = new String[] {"mv","ls","exit","clear","cd","cat","pwd","cp","chmod","ssh","nano","scp","head","tail","mkdir"};
 		
 		ArrayList<Command> commands = new ArrayList<Command>();
 		Command newComm = null;
 		while (read.hasNext()) {
 			String token = read.next();
-			//if we are not working on a command, start a new one`
+			//if we are not working on a command, start a new one
 			if (newComm == null) {
 				//Check to see if the command is a valid one
 				boolean isValid = false;
