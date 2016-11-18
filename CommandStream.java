@@ -109,6 +109,8 @@ public class CommandStream implements ActionListener {
 				error = headTail(command, -1);
 			} else if (command.getCommand().equals("mkdir")) {
 				error = mkdir(command);
+			} else if (command.getCommand().equals("find")) {
+				error = find(command);
 			}
 			
 			//Handle Errors!
@@ -204,7 +206,7 @@ public class CommandStream implements ActionListener {
 				}
 			} else if(("-").equals(tokens[i])) {
 				if(prevDir == null) {
-					output.append("No previous directory available.");
+					output.append("No previous directory available.\n");
 				} else {
 					//Directory temp = currentDirectory;
 					cDir = prevDir;
@@ -248,12 +250,168 @@ public class CommandStream implements ActionListener {
 		currentDirectory = d;
 	}
 	
+	public boolean compareWithWildcards(String a, String b) {
+		return a.matches(b.replaceAll("\\*",".*")) || b.matches(a.replaceAll("\\*",".*"));
+	}
+	
 	//End block of Helper Methods
 	// ----------------------------------------------------------------------------------------------------------------------
 	
 	
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------
 	// Methods to execute Commands with the Command Class
+	
+	
+	//-----------------------------------------------------------
+			// Command: Find
+					// Description: Finds directorys and files that fit the definitions, prints them to output
+				// Input
+					// Required: None
+					// Optional: path
+				// Flags
+					// None: maxdepth (i), iname (str), name (str), type (d/f), ! (yes!no), not, -o
+	//-----------------------------------------------------------
+	public TerminalError find(Command command) {
+		//Determine the path we are using, if it is input or if it is default
+		String path = "";
+		if (command.getInputs().size() > 0) {
+			path = command.getInputs().get(0);
+		}
+		else {
+			path = "";
+		}
+		SearchResults results = validateFilePath(path); // Get if the path is valid
+		if (results.validPath == false) {
+			return new TerminalError("Invalid file path!\n");
+		}
+		if (results.endsWithFile == true) {
+			File endpoint = findFile(results.lastToken, results.lastFoundDir);
+			if (endpoint != null) {
+				sendOutput(results.lastFoundDir.getPath() + endpoint.getName() + "\n"); // Print out just this file
+			}
+		}
+		int maxdepth = Integer.MAX_VALUE;
+		char type = 'a'; // a for all
+		@SuppressWarnings("unchecked") // So the compiler doesn't complain about this
+		ArrayList<String> rules = (ArrayList<String>) command.getFlags().clone();
+		//remove the settings that change the search it self, IE those that are not constraints.
+		for (int i = 0; i < command.getFlags().size(); i++) {
+			//First lets check for flags that modify the search itself, and are not constraints
+			if (compareWithWildcards(command.getFlags().get(i),"-maxdepth*")) {
+				maxdepth = new Integer(command.getFlags().get(i).substring("-maxdepth".length()));
+				rules.remove(i); // Remove these from the rules
+			}
+			else if (compareWithWildcards(command.getFlags().get(i),"-type*")) {
+				type = command.getFlags().get(i).charAt(5);
+				rules.remove(i);
+				if (type != 'f' && type != 'd') return new TerminalError("Invalid type.\n");
+			}
+		}
+		//Check things recursively for those rules.
+		ArrayList<Directory> dirs = new ArrayList<Directory>();
+		dirs.add(results.lastFoundDir);
+		int cdepth = 0;
+		Directory depthTracker = dirs.get(0);
+		while (dirs.isEmpty() == false) {
+			for (Directory d : dirs.get(0).subDirectories) {
+				if (depthTracker != d.parent) {
+					cdepth++;
+					depthTracker = d; // This should work, because this is the first directory we will hit.
+				}
+				if (cdepth > maxdepth) {
+					break; // Exit!
+				}
+				dirs.add(d);
+			}
+			//Print this dir if it is valid, and type is a/d;
+			if (type != 'f') {
+				//Check the rules!
+				if (checkWithRules(dirs.get(0).name(), rules)) {
+					sendOutput(dirs.get(0).getPath()+"\n");
+				}
+			}
+			for (File f : dirs.get(0).files) {
+				//Print the file if it is valid, and type is a/f
+				if (type != 'd') {
+					//check the rules!
+					if (checkWithRules(f.getName(),rules)) {
+						sendOutput(dirs.get(0).getPath() + f.getName() +"\n");
+					}
+				}
+			}
+			dirs.remove(0);
+		}
+		
+		return null; // Exit successfully
+	}
+	// iname (str), name (str), ! (yes!no), not, -o
+	public boolean checkWithRules(String inputname, ArrayList<String> rules) {
+		//ORder of operations, -o, !, not, name, iname
+		boolean[] results = new boolean[rules.size()]; // tracks the result of the rule in this slot
+		boolean[] checked = new boolean[rules.size()]; // Tracks if we have checked this rule yet
+		for (int i = 0; i < results.length; i++) results[i] = true; // Set them all to true
+		for (int i = 0; i < checked.length; i++) checked[i] = false; // Set them all to true
+		
+		int tooManyCheck = 10000;
+		while (tooManyCheck-- > 0) {
+			//Check if we have checked all the rules
+			boolean checkedAll = true;
+			for (int i = 0; i < checked.length; i++) if (checked[i] == false) checkedAll = false;
+			if (checkedAll) break;
+			
+			//Find the next rule in the order of operations: -name -iname -not ! -o
+			for (int i = 0; i < rules.size(); i++) {
+				if (compareWithWildcards(rules.get(i),"-name*") == false) continue;
+				if (checked[i]) continue; // dont check this rule again if we have checked it
+				String name = rules.get(i).substring("-name".length()); // get just the name
+				results[i] = compareWithWildcards(inputname, name);
+				checked[i] = true; // we have checked this rule!
+			}
+			for (int i = 0; i < rules.size(); i++) {
+				if (compareWithWildcards(rules.get(i),"-iname*") == false) continue;
+				if (checked[i]) continue; // dont check this rule again if we have checked it
+				String name = rules.get(i).substring("-iname".length()); // get just the name
+				results[i] = compareWithWildcards(inputname.toLowerCase(), name.toLowerCase());
+				checked[i] = true; // we have checked this rule!
+			}
+			for (int i = 0; i < rules.size(); i++) {
+				if (compareWithWildcards(rules.get(i),"!")  == false && compareWithWildcards(rules.get(i),"-not") == false) continue;
+				if (checked[i]) continue; // dont check this rule again if we have checked it
+				
+				if (i+1 >= rules.size()) return false;  //We need there to be a  next rule
+				if (results[i+1] == false) { // We want the next one to be false, so if the next one is false we override it to true
+					results[i+1] = true;
+				}
+				else {
+					results[i+1] = false;
+				}
+				results[i] = true;
+				checked[i] = true; // we have checked this rule!
+			}
+			for (int i = 0; i < rules.size(); i++) {
+				if (compareWithWildcards(rules.get(i), "-o") == false) continue;
+				if (checked[i]) continue; // dont check this rule again if we have checked it
+				
+				if (i+1 >= rules.size() || i-1 < 0) return false;  //we need there to be rules on either side of this one
+				if (results[i-1] == true || results[i+1] == true) { // if one of our sides is true, both are 
+					results[i-1] = true;
+					results[i]   = true;
+					results[i+1] = true;
+				}
+				checked[i] = true; // we have checked this rule!
+			}
+		}
+		if (tooManyCheck < 0) System.out.println("EMERGENCY STOPPED THE FIND.");
+		
+		//Compile if there was a rule that did not follow
+		boolean totalresult = true;
+		for (int i = 0; i < results.length; i++) if (results[i] == false) totalresult = false; // Set the result to false if one of these ends up false
+		return totalresult;
+	}
+	//END METHOD
+	
+	
+	
 	
 	//-----------------------------------------------------------
 		// Command: Clear
