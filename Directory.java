@@ -56,6 +56,13 @@ public class Directory {
 		files.add(fil);
 	}
 	
+	public boolean isEmpty() {
+		boolean ret = true;
+		if (subDirectories.size() > 0) ret = false;
+		if (files.size() > 0) ret = false;
+		return ret;
+	}
+	
 	public void delFile(File file) {
 		files.remove(file);
 	}

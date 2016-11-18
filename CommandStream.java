@@ -111,6 +111,8 @@ public class CommandStream implements ActionListener {
 				error = mkdir(command);
 			} else if (command.getCommand().equals("find")) {
 				error = find(command);
+			} else if (command.getCommand().equals("rm")) {
+				error = rm(command);
 			}
 			
 			//Handle Errors!
@@ -263,13 +265,70 @@ public class CommandStream implements ActionListener {
 	
 	
 	//-----------------------------------------------------------
-			// Command: Find
-					// Description: Finds directorys and files that fit the definitions, prints them to output
-				// Input
-					// Required: None
-					// Optional: path
-				// Flags
-					// None: maxdepth (i), iname (str), name (str), type (d/f), ! (yes!no), not, -o
+	// Command: rm
+			// Description: removes a file or directory
+		// Input
+			// Required: path to file/direcotory
+			// Optional: None
+		// Flags
+			// None: -d -r
+	//-----------------------------------------------------------
+	public TerminalError rm(Command command) {
+		if (command.getInputs().size() < 1) {
+			return new TerminalError("Not enough arguments.\n");
+		}
+		
+		String path = command.getInputs().get(0);
+		SearchResults results = validateFilePath(path);
+		
+		if (results.validPath == false)
+			return new TerminalError("Invalid Path.");
+		
+		if (results.endsWithFile == false) {
+			boolean deleteDir = false; // Look for the two flags we are currently using
+			boolean  deleteRecur = false; 
+			for (int i = 0; i < command.getFlags().size();i++) 
+				if (compareWithWildcards(command.getFlags().get(i),"-d")) 
+					deleteDir = true;
+			for (int i = 0; i < command.getFlags().size();i++) 
+				if (compareWithWildcards(command.getFlags().get(i),"-r")) 
+					deleteRecur = true;
+			
+			if (deleteDir == false) {
+				return new TerminalError("rm: cannot remove ‘" + results.lastToken + "’: Is a directory. To remove a directory, use the -d flag.\n");
+			}
+			
+			//So because this is java, a recursive delete and a non recursive delete work out the same
+			// So we just need to check the one case when we do not want to delete this directory
+			// which is when it is not empty and we are not deleting recursively
+			if (results.lastFoundDir.isEmpty() == false && deleteRecur == false) {
+				return new TerminalError("rm: cannot remove ‘" + results.lastToken + "’: Is not empty. Use -r flag to remove an non empty directory, it will delete all things in the directory.\n");
+			}
+			
+			results.lastFoundDir.parent.remDir(results.lastFoundDir); // drop the directory
+			
+		}
+		else {
+			File file = findFile(results.lastToken, results.lastFoundDir);
+			if (file != null) {
+				results.lastFoundDir.delFile(file);
+			}
+			else {
+				return new TerminalError("rm: cannot remove "+ results.lastToken + ": No such file or directory\n");
+			}
+		}
+		
+		return null; 
+	}
+	
+	//-----------------------------------------------------------
+		// Command: Find
+				// Description: Finds directorys and files that fit the definitions, prints them to output
+			// Input
+				// Required: None
+				// Optional: path
+			// Flags
+				// None: maxdepth (i), iname (str), name (str), type (d/f), ! (yes!no), not, -o
 	//-----------------------------------------------------------
 	public TerminalError find(Command command) {
 		//Determine the path we are using, if it is input or if it is default
@@ -280,16 +339,19 @@ public class CommandStream implements ActionListener {
 		else {
 			path = "";
 		}
+		
 		SearchResults results = validateFilePath(path); // Get if the path is valid
 		if (results.validPath == false) {
 			return new TerminalError("Invalid file path!\n");
 		}
-		if (results.endsWithFile == true) {
+		
+		if (results.endsWithFile == true) { // If this is just one file we can skip alot of the hard work
 			File endpoint = findFile(results.lastToken, results.lastFoundDir);
 			if (endpoint != null) {
 				sendOutput(results.lastFoundDir.getPath() + endpoint.getName() + "\n"); // Print out just this file
 			}
 		}
+		
 		int maxdepth = Integer.MAX_VALUE;
 		char type = 'a'; // a for all
 		@SuppressWarnings("unchecked") // So the compiler doesn't complain about this
