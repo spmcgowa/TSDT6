@@ -6,12 +6,24 @@ public class Directory {
 	protected Directory parent;
 	protected ArrayList<Directory> subDirectories;
 	protected ArrayList<File> files;
+	protected String otherWritePerm;
+	protected String otherReadPerm;
+	protected String otherExecutePerm;
+	protected String allWritePerm;
+	protected String allReadPerm;
+	protected String allExecutePerm;
 	
 	public Directory(String name, Directory parent, ArrayList<Directory> contents, ArrayList<File> files) {
 		this.name = name;
 		this.parent = parent;
 		subDirectories = contents;
 		this.files = files;
+		otherWritePerm = "w";
+		otherReadPerm = "r";
+		otherExecutePerm = "x";
+		allWritePerm = "w";
+		allReadPerm = "r";
+		allExecutePerm = "x";
 	}
 	
 	public String getPath() {
@@ -58,6 +70,54 @@ public class Directory {
 	
 	public void delFile(File file) {
 		files.remove(file);
+	}
+	
+	public String allWritePerm() {
+		return allWritePerm;
+	}
+	
+	public String allReadPerm() {
+		return allReadPerm;
+	}
+	
+	public String allExecutePerm() {
+		return allExecutePerm;
+	}
+	
+	public String otherWritePerm() {
+		return otherWritePerm;
+	}
+	
+	public String otherReadPerm() {
+		return otherReadPerm;
+	}
+	
+	public String otherExecutePerm() {
+		return otherExecutePerm;
+	}
+	
+	protected void setAllRead(String str) {
+		this.allReadPerm = str;
+	}
+	
+	protected void setAllWrite(String str) {
+		this.allWritePerm = str;
+	}
+	
+	protected void setAllExecute(String str) {
+		this.allExecutePerm = str;
+	}
+	
+	protected void setOtherWrite(String str) {
+		this.otherWritePerm = str;
+	}
+	
+	protected void setOtherRead(String str) {
+		this.otherReadPerm = str;
+	}
+	
+	protected void setOtherExecute(String str) {
+		this.otherExecutePerm = str;
 	}
 	
 }

@@ -32,12 +32,12 @@ public class Parser {
 		
 		
 		JPanel display = new JPanel();
+			
 			JLabel graphics = new JLabel();
 			
 			graphics.setPreferredSize(new Dimension(x, (int)((y/2)*0.8)));
 			
 			display.add(graphics);
-			
 			house.add(display);
 			
 		//JTextPane to display story-advancing dialogue
@@ -49,7 +49,7 @@ public class Parser {
 			
 			JScrollPane necessaryEvil = new JScrollPane(storyOutput);
 			necessaryEvil.setPreferredSize(new Dimension(x, (int)((y/2)*0.2)));
-			necessaryEvil.getVerticalScrollBar().setPreferredSize(new Dimension(0, 0));
+			//necessaryEvil.getVerticalScrollBar().setPreferredSize(new Dimension(0, 0));
 			
 			dialogue.add(necessaryEvil);
 			
@@ -112,7 +112,7 @@ public class Parser {
 
 		//this sets up a listener and adds it to the input box, allowing for the input
 		//to be processed when the user presses [ENTER]
-		CommandStream cs = new CommandStream(input, output, p.root, p.root, buttons, "", storyOutput);
+		CommandStream cs = new CommandStream(input, output, p.root, p.root, buttons, "", storyOutput, graphics, x, y);
 		//cs.setStartingDir(startingDir);
 		input.addActionListener(cs);
 		save.addActionListener(cs);

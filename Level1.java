@@ -66,9 +66,9 @@ public class Level1 {
 				} else if(location.name().equals("Egypt")) {
 					output.setText("From the airport you can get to Giza or Alexandria. Type cd Giza to get to Giza.");
 				}
-			} else if(stepCount == 33) {
-				output.setText("Remember what you've learned.  Use this knowledge well, and the temple will yield its secrets!");
-				stepCount++;
+			} else if(stepCount == 33 && (location.equals("HypostyleHall") || location.equals("GrandGallery"))) {
+				output.setText("To move a file: mv [filename] [destination directory]<br>To rename a file or directory: mv [old name] [optional file path][new name]<br>"
+						+ "Go to a specific directory: cd [directory name]<br>Go to the parent directory: cd ..<br>Go to the previous directory: cd -<br>View directory contents: ls<br>View all directory contents: ls -a");
 			} else if(stepCount == 31 && location.name().equals(".PyramidOfHeket")) {
 				output.setText("We're in! It looks nobody has set foot in here in centuries. Let's see what's here. Why don't you open your map again?");
 				stepCount++;
@@ -92,7 +92,9 @@ public class Level1 {
 			} else if(stepCount == 32 && location.name().equals(".PyramidOfHeket")) {
 				output.setText("The GrandGallery and HypostyleHall are the subdirectories in .PyramidOfHeket.<br>They can be opened with the cd [directory name] command.<br>If you want to explore the GrandGallery, type cd GrandGallery.<br>If you want to explore the HypostyleHall, type cd HypostyleHall.");
 				stepCount++;
-			} 
+			} else if(stepCount == 33 && location.name().equals("GrandGallery") && cmd.getFlags().get(0).equals("0")) {
+				
+			}
 		} else if(stepCount == 12 && location.name().equals("Airport")) {
 			output.setText("To move files, Linux uses the mv command.<br>[Enter]");
 			stepCount++;

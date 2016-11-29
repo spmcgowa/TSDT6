@@ -19,11 +19,14 @@ public class CommandStream implements ActionListener {
 	Level3 lv3;
 	Level4 lv4;
 	Level5 lv5;
-	boolean storyReadyToAdvance = true;
+	boolean sshActive = false;
 	int currentLevel;
+	DimensionX dimension = new DimensionX();
+	Graphics g;
+	Directory preservation;
 
 	public CommandStream(JTextField input, JTextArea output, Directory cd,
-			Directory root, JPanel buttons, String lv1, JTextPane graphicsTextOutput) {
+			Directory root, JPanel buttons, String lv1, JTextPane graphicsTextOutput, JLabel graphics, int x, int y) {
 		this.input = input;
 		this.output = output;
 		setCurrentDirectory(cd);
@@ -36,6 +39,7 @@ public class CommandStream implements ActionListener {
 		lv.setLocation(currentDirectory);
 		lv.playLevel1(new Command());
 		currentLevel = 1;
+		g = new Graphics(graphics, x, y);
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -109,12 +113,23 @@ public class CommandStream implements ActionListener {
 				error = headTail(command, -1);
 			} else if (command.getCommand().equals("mkdir")) {
 				error = mkdir(command);
+			} else if (command.getCommand().equals("chmod")) {
+				error = chmod(command);
+			} else if (command.getCommand().equals("ssh")) {
+				error = ssh(command);
 			}
 			
 			//Handle Errors!
 			if(error != null) {
 				//Output Error!
 				sendOutput(error.getString());
+			}
+			
+			try {
+				g.updateGraphics(command, currentDirectory);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+				System.exit(1);
 			}
 			
 			if(commands != null) {
@@ -343,6 +358,8 @@ public class CommandStream implements ActionListener {
 			if (command.getInputs().size() < 2) {
 				return new TerminalError("Not enough Arguments.\n");
 			}
+			
+			//verifying given path
 			String fileName = command.getInputs().get(0);
 			String path = command.getInputs().get(1);
 			
@@ -387,12 +404,14 @@ public class CommandStream implements ActionListener {
 			
 			String fileName = command.getInputs().get(0);
 			
+			//checking for file; if no such file, create it
 			File file = findFile(fileName, currentDirectory);
 			if (file == null) {
 				file = new File(fileName, "");
 				currentDirectory.addFile(file);
 			}
 			
+			//turn the output pane into an editor
 			input.setText("");
 			output.setText(file.getContents());
 			input.setEditable(false);
@@ -437,23 +456,84 @@ public class CommandStream implements ActionListener {
 			}
 			
 			
-			for (Directory dir : currentDirectory.getSubDirs()) {
-				if (command.getFlags().size() == 1 && command.getFlags().get(0).equals("-a")) {
+			//checking for the -a flag; if found, list all files including .* files
+			if(command.getFlags().size() == 1 && command.getFlags().get(0).equals("-a")) {
+				for(Directory dir : currentDirectory.getSubDirs()) {
 					sendOutput(dir.name() + "\n");
-				} else {
-					if (dir.name().charAt(0) != '.') {
-						sendOutput(dir.name() + "\n");
+				}
+				
+				for(File f : currentDirectory.getFiles()) {
+					sendOutput(f.getName() + "\n");
+				}
+				
+				return null;
+				
+			//checking for the -l flag; -l lists the permissions for the 'other' group for all
+			//files and directories in the current working directory
+			} else if(command.getFlags().size() > 0 && command.getFlags().get(0).equals("-l")) {
+				if(command.getInputs().size() == 1) {
+					String arg = command.getInputs().get(0);
+					File f = findFile(arg, currentDirectory);
+					if(f == null) {
+						SearchResults r = validateFilePath(arg);
+						Directory d = r.lastFoundDir;
+						if(d == null) {
+							return new TerminalError(arg + " not found!\n");
+						} else {
+							String output = "";
+							output += "d";
+							output += d.otherReadPerm();
+							output += d.otherWritePerm();
+							output += d.otherExecutePerm();
+							sendOutput(output + "\n");
+							return null;
+							
+						}
+					} else {
+						String output = "";
+						output += "-";
+						output += f.otherReadPerm();
+						output += f.otherWritePerm();
+						output += f.otherExecutePerm();
+						sendOutput(output + "\n");
+						return null;
 					}
+				}
+
+				String output = "";
+				
+				for(File f : currentDirectory.getFiles()) {
+					output += "-";
+					output += f.otherReadPerm();
+					output += f.otherWritePerm();
+					output += f.otherExecutePerm();
+					output += "      ";
+					output += f.getName() + "\n";
+				}
+				sendOutput(output);
+				output = "";
+				for(Directory d : currentDirectory.getSubDirs()) {
+					output += "d";
+					output += d.otherReadPerm();
+					output += d.otherWritePerm();
+					output += d.otherExecutePerm();
+					output += "      ";
+					output += d.name() + "\n";
+				}
+				sendOutput(output);
+				return null;
+			}
+			
+			//no flags, normal ls
+			for (Directory dir : currentDirectory.getSubDirs()) {
+				if (dir.name().charAt(0) != '.') {
+					sendOutput(dir.name() + "\n");
 				}
 			}
 			
 			for (File file : currentDirectory.getFiles()) {
-				if (command.getFlags().size() == 1 && command.getFlags().get(0).equals("-a")) {
+				if (file.getName().charAt(0) != '.') {
 					sendOutput(file.getName() + "\n");
-				} else {
-					if (file.getName().charAt(0) != '.') {
-						sendOutput(file.getName() + "\n");
-					}
 				}
 			}
 			return null;
@@ -532,8 +612,15 @@ public class CommandStream implements ActionListener {
 		//-----------------------------------------------------------
 		//[TODO] Probably should confirm with player since this is a game? Or trigger a save?
 		public TerminalError exit() {
-			System.exit(0);
-			return new TerminalError("Closing Console!");
+			if(!sshActive) {
+				System.exit(0);
+				return new TerminalError("Closing Console!");
+			} else {
+				sshActive = false;
+				currentDirectory = preservation;
+				preservation = null;
+			}
+			return null;
 		}//End Method
 		
 		//-----------------------------------------------------------
@@ -547,18 +634,24 @@ public class CommandStream implements ActionListener {
 		// ----------------------------------------------------------
 		public TerminalError headTail(Command comm, int arg) {
 			
+			//checking for a valid number of arguments
 			if(comm.getInputs().size() != 1) {
 				return new TerminalError("One argument required!\n");
 			}
+			
+			//locate specified file
 			File f = findFile(comm.getInputs().get(0), currentDirectory);
 			
 			String[] text = f.getContents().split("\n");
 			
+			//determining whether head or tail was entered
 			if(arg < 0) {
+				//looping through the last 10 lines of the file if they exist, terminating early if not
 				for(int i = (Math.max(text.length - 10, 0)); i < text.length; i++) {
 					output.append(text[i] + "\n");
 				}
 			} else {
+				//looping throught the first 10 lines of the file if they exist, terminating early if not
 				for(int i = 0; i < (Math.min(10, text.length)); i++) {
 					output.append(text[i] + "\n");
 				}
@@ -567,14 +660,313 @@ public class CommandStream implements ActionListener {
 			return null;
 		}
 		
+		/**
+		 * I'm so sorry for what follows this comment.  When you can't understand what the heck I've done here, ask me and hopefully
+		 * I'll be able to remember and tell you.
+		 * 
+		 */
+		public TerminalError chmod(Command cmd) {
+			if(cmd.getInputs().size() < 2) {
+				return new TerminalError("Not enough arguments.\n");
+			}
+
+			String permissions = cmd.getInputs().get(1);
+			
+			String file = cmd.getInputs().get(0);
+			Object f = findFile(file, currentDirectory);
+			
+			for(Directory d : currentDirectory.getSubDirs()) {
+				if(d.name().equals(file)) {
+					f = d;
+					break;
+				}
+			}
+			
+			if(f == null) {
+				return new TerminalError(f + " not found!\n");
+			}
+			
+			if(permissions.equals("")) {
+				return new TerminalError("Invalid permissions argument.\n");
+			}
+			// parse permissions string
+			String identifiers = "";
+			String accessModifiers = "";
+			String setModifier = "";
+			int aCount = 0;
+			int oCount = 0;
+			int setModifierCount = 0;
+			int wCount = 0;
+			int rCount = 0;
+			int xCount = 0;
+			char[] perms = permissions.toCharArray();
+			String next = "";
+			for(int i = 0; i < perms.length; i++) {
+				
+				next = perms[i] + "";
+				
+				if(next.equals("a") && aCount == 0) {
+					aCount++;
+					identifiers += "a";
+				} else if(next.equals("o") && oCount == 0) {
+					oCount++;
+					identifiers += "o";
+				} else if(next.equals("+") && setModifierCount == 0) {
+					setModifier = "+";
+					setModifierCount++;
+				} else if(next.equals("-") && setModifierCount == 0) {
+					setModifier = "-";
+					setModifierCount++;
+				} else if(next.equals("=") && setModifierCount == 0) {
+					setModifier = "=";
+					setModifierCount++;
+				} else if(next.equals("w") && wCount == 0) {
+					accessModifiers += "w";
+					wCount++;
+				} else if(next.equals("r") && rCount == 0) {
+					accessModifiers += "r";
+					rCount++;
+				} else if(next.equals("x") && xCount == 0) {
+					accessModifiers += "x";
+					xCount++;
+				} else {
+					if(aCount > 1 || oCount > 1) {
+						return new TerminalError("Each identifier can only appear once.\n");
+					} else if(setModifierCount != 1) {
+						return new TerminalError("Exactly one permissions modifier required.\n");
+					} else if(wCount > 1 || rCount > 1 || xCount > 1) {
+						return new TerminalError("Access modifiers can only appear once.\n");
+					}
+				}
+				
+			}
+			
+			if(identifiers.contains("a")) {
+				if(setModifier.equals("+")) {
+					if(accessModifiers.contains("w")) {
+						if(f instanceof File) {
+							((File)f).setAllWrite("w");
+							((File)f).setOtherWrite("w");
+						} else {
+							((Directory)f).setAllWrite("w");
+							((Directory)f).setOtherWrite("w");
+						}
+					}
+					if(accessModifiers.contains("r")) {
+						if(f instanceof File) {
+							((File)f).setAllRead("r");
+							((File)f).setOtherRead("r");
+						} else {
+							((Directory)f).setAllRead("r");
+							((Directory)f).setOtherRead("r");
+						}
+					}
+					if(accessModifiers.contains("x")) {
+						if(f instanceof File) {
+							((File)f).setAllExecute("x");
+							((File)f).setOtherExecute("x");
+						} else {
+							((Directory)f).setAllExecute("x");
+							((Directory)f).setOtherExecute("x");
+						}
+					}
+				} else if(setModifier.equals("-")) {
+					if(accessModifiers.contains("w")) {
+						if(f instanceof File) {
+							((File)f).setAllWrite("-");
+							((File)f).setOtherWrite("-");
+						} else {
+							((Directory)f).setAllWrite("-");
+							((Directory)f).setOtherWrite("-");
+						}
+					}
+					if(accessModifiers.contains("r")) {
+						if(f instanceof File) {
+							((File)f).setAllRead("-");
+							((File)f).setOtherRead("-");
+						} else {
+							((Directory)f).setAllRead("-");
+							((Directory)f).setOtherRead("-");
+						}
+					}
+					if(accessModifiers.contains("x")) {
+						if(f instanceof File) {
+							((File)f).setAllExecute("-");
+							((File)f).setOtherExecute("-");
+						} else {
+							((Directory)f).setAllExecute("-");
+							((Directory)f).setOtherExecute("-");
+						}
+					}
+				} else if(setModifier.equals("=")) {
+					if(accessModifiers.contains("w")) {
+						if(f instanceof File) {
+							((File)f).setAllWrite("w");
+							((File)f).setOtherWrite("w");
+						} else {
+							((Directory)f).setAllWrite("w");
+							((Directory)f).setOtherWrite("w");
+						}
+					} else {
+						if(f instanceof File) {
+							((File)f).setAllWrite("-");
+							((File)f).setOtherWrite("-");
+						} else {
+							((Directory)f).setAllWrite("-");
+							((Directory)f).setOtherWrite("-");
+						}
+					}
+					if(accessModifiers.contains("r")) {
+						if(f instanceof File) {
+							((File)f).setAllRead("r");
+							((File)f).setOtherRead("r");
+						} else {
+							((Directory)f).setAllRead("r");
+							((Directory)f).setOtherRead("r");
+						}
+					} else {
+						if(f instanceof File) {
+							((File)f).setAllRead("-");
+							((File)f).setOtherRead("-");
+						} else {
+							((Directory)f).setAllRead("-");
+							((Directory)f).setOtherRead("-");
+						}
+					}
+					if(accessModifiers.contains("x")) {
+						if(f instanceof File) {
+							((File)f).setAllExecute("x");
+							((File)f).setOtherExecute("x");
+						} else {
+							((Directory)f).setAllExecute("x");
+							((Directory)f).setOtherExecute("x");
+						}
+					} else {
+						if(f instanceof File) {
+							((File)f).setAllExecute("-");
+							((File)f).setOtherExecute("-");
+						} else {
+							((Directory)f).setAllExecute("-");
+							((Directory)f).setOtherExecute("-");
+						}
+					}
+				}
+			} else if(identifiers.equals("o")) {
+				if(setModifier.equals("+")) {
+					if(accessModifiers.contains("w")) {
+						if(f instanceof File) {
+							((File)f).setOtherWrite("w");
+						} else {
+							((Directory)f).setOtherWrite("w");
+						}
+					}
+					if(accessModifiers.contains("r")) {
+						if(f instanceof File) {
+							((File)f).setOtherRead("r");
+						} else {
+							((Directory)f).setOtherRead("r");
+						}
+					}
+					if(accessModifiers.contains("x")) {
+						if(f instanceof File) {
+							((File)f).setOtherExecute("x");
+						} else {
+							((Directory)f).setOtherExecute("x");
+						}
+					}
+				} else if(setModifier.equals("=")) {
+					if(accessModifiers.contains("w")) {
+						if(f instanceof File) {
+							((File)f).setOtherWrite("w");
+						} else {
+							((Directory)f).setOtherWrite("w");
+						}
+					} else {
+						if(f instanceof File) {
+							((File)f).setOtherWrite("-");
+						} else {
+							((Directory)f).setOtherWrite("-");
+						}
+					}
+					if(accessModifiers.contains("r")) {
+						if(f instanceof File) {
+							((File)f).setOtherRead("r");
+						} else {
+							((Directory)f).setOtherRead("r");
+						}
+					} else {
+						if(f instanceof File) {
+							((File)f).setOtherRead("-");
+						} else {
+							((Directory)f).setOtherRead("-");
+						}
+					}
+					if(accessModifiers.contains("x")) {
+						if(f instanceof File) {
+							((File)f).setOtherExecute("x");
+						} else {
+							((Directory)f).setOtherExecute("x");
+						}
+					} else {
+						if(f instanceof File) {
+							((File)f).setOtherExecute("-");
+						} else {
+							((Directory)f).setOtherExecute("-");
+						}
+					}
+				} else if(setModifier.equals("-")) {
+					if(accessModifiers.contains("w")) {
+						if(f instanceof File) {
+							((File)f).setOtherWrite("-");
+						} else {
+							((Directory)f).setOtherWrite("-");
+						}
+					}
+					if(accessModifiers.contains("r")) {
+						if(f instanceof File) {
+							((File)f).setOtherRead("-");
+						} else {
+							((Directory)f).setOtherRead("-");
+						}
+					}
+					if(accessModifiers.contains("x")) {
+						if(f instanceof File) {
+							((File)f).setOtherExecute("-");
+						} else {
+							((Directory)f).setOtherExecute("-");
+						}
+					}
+				}
+			}
+			
+			return null;
+		}
+		
+		/**
+		 * ssh transfers the current working directory to a new simulated system called 'DimensionX'
+		 * 
+		 * @param comm Last command entered.  Doesn't actually do anything in this method.
+		 * @return null; no terminal error should ever happen given that ssh cannot fail.
+		 */
+		public TerminalError ssh(Command comm) {
+			sshActive = true;
+			preservation = currentDirectory;
+			
+			DimensionX d = new DimensionX();
+			currentDirectory = d.buildDimX();
+			return null;
+		}
+		
 		public TerminalError mkdir(Command comm) {
 			
+			//checking for appropriate number of inputs
 			if(comm.getInputs().size() != 1) {
 				return new TerminalError("Exactly 1 argument required!");
 			}
 			
 			String dirName = comm.getInputs().get(0);
 			
+			//creating and adding the new directory to the current working directory
 			Directory newDir = new Directory(dirName, currentDirectory, new ArrayList<Directory>(), new ArrayList<File>());
 			currentDirectory.addDirectory(newDir);
 			

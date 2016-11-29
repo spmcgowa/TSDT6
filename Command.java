@@ -13,11 +13,13 @@ public class Command {
 		return ret;
 	}
 
+	//tar flags: -t, -c, -x (secondary priority, -v, -f)
+	
 	//[TODO] Currently does not start a new command if the ; or && touching another block.
 			//Might want to switch to doing split on ; and && to break everything up first?
 	public static ArrayList<Command> GenerateCommands(String input) {
 		Scanner read = new Scanner(input);
-		String[] validCommands = new String[] {"mv","ls","exit","clear","cd","cat","pwd","cp","chmod","ssh","nano","scp","head","tail","mkdir"};
+		String[] validCommands = new String[] {"mv","ls","exit","clear","cd","cat","pwd","cp","chmod","ssh","nano","scp","head","tail","mkdir","chmod","ssh"};
 		
 		ArrayList<Command> commands = new ArrayList<Command>();
 		Command newComm = null;
