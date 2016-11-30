@@ -113,6 +113,12 @@ public class CommandStream implements ActionListener {
 				error = find(command);
 			} else if (command.getCommand().equals("rm")) {
 				error = rm(command);
+			} else if (command.getCommand().equals("tar")) {
+				error = tar(command);
+			} else if (command.getCommand().equals("zip")) {
+				error = zip(command);
+			} else if (command.getCommand().equals("tar")) {
+				error = unzip(command);
 			}
 			
 			//Handle Errors!
@@ -244,6 +250,29 @@ public class CommandStream implements ActionListener {
 		return searchR;
 	}
 	
+	public boolean compareSearchResults(SearchResults a, SearchResults b) {
+		//Begin comparing
+		if (a.lastFoundDir.equals(b.lastFoundDir)) {
+			//They share the exact same result directory.
+			if (a.endsWithFile != b.endsWithFile) {
+				return true;
+			}
+			else if (a.endsWithFile) {
+				// the case that both are files
+				File f1 = findFile(a.lastToken,a.lastFoundDir);
+				File f2 = findFile(b.lastToken,b.lastFoundDir);
+				if (f1.equals(f2)) {
+					return false;
+				}
+			}
+			else {
+				//the case that both are directories, we already checked if they are equal to get this far
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	public void sendOutput(String out) {
 		output.append(out);
 	}
@@ -262,7 +291,283 @@ public class CommandStream implements ActionListener {
 	
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------
 	// Methods to execute Commands with the Command Class
+
+	//----------------------------------------------------------
+		// Command: zip
+				// Description: bundles a group of files and directories, basically a simplified version of tar in our setup
+			// Input
+				// Required: bundled name, at least one file to add
+				// Optional: None
+			// Flags
+				// [TODO] fill this in
+		//-----------------------------------------------------------
+	public TerminalError zip(Command command) {
+		if (command.getInputs().size() < 2) {
+			return new TerminalError("Not enough arguments.\n");
+		}
+		String ret = "tar -czf ";
+		for (String s : command.getInputs()) {
+			ret += s;
+			ret += " ";
+		}
+		
+		return tar(Command.GenerateCommands(ret).get(0));
+	}
 	
+	public TerminalError unzip(Command command) {
+		if (command.getInputs().size() < 2) {
+			return new TerminalError("Not enough arguments.\n");
+		}
+		String ret = "tar -xf ";
+		for (String s : command.getInputs()) {
+			ret += s;
+			ret += " ";
+		}
+		
+		return tar(Command.GenerateCommands(ret).get(0));
+	}
+	
+	
+	
+	
+	//----------------------------------------------------------
+	// Command: tar
+			// Description: bundles a group of files and directories
+		// Input
+			// Required: bundled name, at least one file to add
+			// Optional: None
+		// Flags
+			// [TODO] fill this in
+	//-----------------------------------------------------------
+	public TerminalError tar(Command command) {
+		if (command.getInputs().size() < 1) {
+			return new TerminalError("Not enough arguments.\n");
+		}
+		
+		String flags = "";
+		//Cram all of these flags together
+		for (int i = 0; i < command.getFlags().size(); i++) {
+			flags += command.getFlags().get(1);
+		}
+		/*
+		-c Create a tar // Exclusive with x
+		-x Extract tar Contents // Exclusive with c
+
+		-f Display what is going on while running the command
+
+		-t Display a finished tarball's contents
+		-v Display Verbose information for a tarball's contents 
+
+		-z Create a gzip file // Useless for our thing, but needs to be accepted
+		-j create a bzip file // useless for our thing, but needs to be accepted as valid
+		
+		7 Possible flags
+		*/
+										//c		x		f		t		v	z		j
+		boolean[] bools = new boolean[] {false, false, false, false, false, false, false};
+		
+		for (int i = 0; i < flags.length(); i++) {
+			if (flags.charAt(i) == 'c') {
+				if (bools[1] == true || bools[3] == true || bools[4] == true)
+					return new TerminalError("You can only have one type of modification flag {c,x,t,v}.\n");
+				bools[0] = true;
+			}
+			else if (flags.charAt(i) == 'x') {
+				if (bools[0] == true || bools[3] == true || bools[4] == true)
+					return new TerminalError("You can only have one type of modification flag {c,x,t,v}.\n");
+				bools[1] = true;
+			}
+			else if (flags.charAt(i) == 'f') {
+				bools[2] = true;
+			}
+			else if (flags.charAt(i) == 't') {
+				if (bools[0] == true || bools[1] == true || bools[4] == true)
+					return new TerminalError("You can only have one type of modification flag {c,x,t,v}.\n");
+				bools[3] = true;
+			}
+			else if (flags.charAt(i) == 'v') {
+				if (bools[0] == true || bools[3] == true || bools[1] == true)
+					return new TerminalError("You can only have one type of modification flag {c,x,t,v}.\n");
+				bools[4] = true;
+			}
+			else if (flags.charAt(i) == 'z') {
+				if (bools[6] == true)
+					return new TerminalError("You can only have one type of modification flag {c,x,t,v}.\n");
+				bools[5] = true;
+			}
+			else if (flags.charAt(i) == 'j') {
+				if (bools[5] == true)
+					return new TerminalError("Invalid flags.");
+				bools[6] = true;
+			}
+			
+			
+		}
+		//compile how much information are we supposed to output, this will either be 0 for non, 1 for basic, 2 for verbose
+		int outputLevel = 0 + ( (bools[3]) ? 1 : 0) + (( (bools[4]) ? 2 : 0));
+		
+		//Now do the right thing
+		if (bools[0] == true) {
+			bundleTar(command, outputLevel);
+		}
+		else if (bools[1] == true)  {
+			unbundleTar(command, outputLevel);
+		}
+		else if (bools[2] == true) {
+			//Print a tarball's contents, check t of v for level of output
+			String path = command.getInputs().get(0);
+			SearchResults results = validateFilePath(path);
+			if (results.validPath)
+				return new TerminalError("Invalid file path.\n");
+			
+			File file = findFile(results.lastToken,results.lastFoundDir);
+			if (file == null) 
+				return new TerminalError("Invalid file path.\n");
+			if (file instanceof TarBall == false)
+				return new TerminalError("Not a tar/zip file.\n");
+			outputBundle(((TarBall) file).getItems(), outputLevel);
+		}
+
+		return null;
+	}
+	
+	private void outputBundle(ArrayList<Object> items, int outputLevel) {
+		if (outputLevel == 0) return;
+		
+		for (int i = 0; i < items.size(); i++) {
+			if (outputLevel == 1) {
+				for (Object o : items) {
+					if (o instanceof File) {
+						sendOutput( ((File)o).getName() + "\n");
+					}
+					else {
+						sendOutput( ((Directory)o).name() + "\n");
+					}
+				}
+			}
+			else if (outputLevel == 2) {
+				//[TODO] do something here?
+			}
+		}
+	}
+	
+	private TerminalError unbundleTar(Command command, int outputLevel) {
+		//analyze the path
+		String path = command.getInputs().get(0);
+		SearchResults results = validateFilePath(path);
+		//Check if path is valid
+		if (results.endsWithFile == false)
+			return new TerminalError("Invalid file path.\n");
+		File file = findFile(results.lastToken,results.lastFoundDir);
+		//Check if file is valid
+		if (file == null)
+			return new TerminalError("Not a valid file.\n");
+		// check if this is actually a bundle file
+		if (file instanceof TarBall == false)
+			return new TerminalError("Not a tar/zip file.\n");
+		TarBall bundle = (TarBall) file;
+		outputBundle(bundle.getItems(),outputLevel);
+		//Unpack everything
+		for (int i = 0; i < bundle.getItems().size(); i++) {
+			if (bundle.getItems().get(i) instanceof File) {
+				File f = (File)bundle.getItems().get(i);
+				currentDirectory.addFile(f);
+			}
+			else {
+				Directory d = (Directory)bundle.getItems().get(i);
+				currentDirectory.addDirectory(d);
+			}
+		}
+		return null;
+	}
+	
+	
+	private TerminalError bundleTar(Command command, int outputLevel) {
+		//The path for our new file
+		String outputPath = command.getInputs().get(0);
+		SearchResults outputSearch = validateFilePath(outputPath);
+		
+		if (outputSearch.validPath == false)
+			return new TerminalError("Invalid output path.");
+		
+		//We need to prep the inputs a little, because we can name both a file and that files parent directory,
+		//but we only really need to include the directory and we do not want to add a directory first;
+		ArrayList<String> prepInputs = command.getInputs();
+		prepInputs.remove(0); //remove the output path that is included in the command inputs
+		
+		for (int i = prepInputs.size(); i >= 0 ; i--) {
+			//Get the path for the item
+			String itemPath = command.getInputs().get(i);
+			SearchResults itemSearch = validateFilePath(itemPath);
+			if (itemSearch.validPath == false)
+				return new TerminalError("Invalid file path.");
+			//First check for duplicates
+			//Loop through all other inputs, check if they match the current one and remove it if they do 
+			for (int j = prepInputs.size(); j >= 0 ; j--) {
+				if (i==j) continue; // Dont delete the original thing we were checking
+				
+				//Prep the second items information
+				String itemPath2 = command.getInputs().get(j);
+				SearchResults itemSearch2 = validateFilePath(itemPath2);
+				if (itemSearch2.validPath == false)
+					return new TerminalError("Invalid file path.");
+				
+				//Compare them
+				if (compareSearchResults(itemSearch,itemSearch2) == true) {
+					prepInputs.remove(j);
+				}
+				
+			}
+				
+			//Now as an additional step of prep, we need to run through all inputs and see if 
+			//they are a higher level in the hierarchy and remove the lower levels
+			//For example, if we want to bundle dir1 and dir1/file1, file1 is already getting included
+			// at a higher point in the hierarchy so we want to remove it from the inputs to avoid errors.
+			if (itemSearch.endsWithFile == false) { //do not need to check files
+				String truePath1 = itemSearch.lastFoundDir.getPath();
+				for (int j = prepInputs.size(); j >= 0 ; j--) {
+					if (i==j) continue; // Dont delete the original thing we were checking
+					//Prep the second items information
+					String itemPath2 = command.getInputs().get(j);
+					SearchResults itemSearch2 = validateFilePath(itemPath2);
+					if (itemSearch2.validPath == false)
+						return new TerminalError("Invalid file path.");
+					String truePath2 = itemSearch.lastFoundDir.getPath();
+					//We add a wildcard to the end of the first file path, 
+					//so if this is higher up the hierarchy they will be equal!
+					if (compareWithWildcards(truePath1 + "*", truePath2)) {
+						//This means we can remove the lower hierarchy one.
+						prepInputs.remove(j);
+					}
+				}	
+			}
+		}
+		//the inputs should now be properly prepped to avoid issues. 
+		
+		//This array list will hold all the items we are putting into the bundle
+		ArrayList<Object> items = new ArrayList<Object>();
+		outputBundle(items, outputLevel);
+		for (int i = 1; i < prepInputs.size(); i++) {
+			//Get the path for the item
+			String itemPath = command.getInputs().get(i);
+			SearchResults itemSearch = validateFilePath(itemPath);
+			if (itemSearch.validPath == false)
+				return new TerminalError("Invalid file path.");
+			if (itemSearch.endsWithFile) {
+				File file = findFile(itemSearch.lastToken,itemSearch.lastFoundDir);
+				if (file != null) {
+					items.add(file);
+				}
+			}
+			else {
+				items.add(itemSearch.lastFoundDir);
+			}
+		}
+		
+		TarBall bundle = new TarBall(outputSearch.lastToken,items);
+		outputSearch.lastFoundDir.addFile(bundle);
+		return null;
+	}
 	
 	//-----------------------------------------------------------
 	// Command: rm
@@ -271,7 +576,7 @@ public class CommandStream implements ActionListener {
 			// Required: path to file/direcotory
 			// Optional: None
 		// Flags
-			// None: -d -r
+			// -d -r
 	//-----------------------------------------------------------
 	public TerminalError rm(Command command) {
 		if (command.getInputs().size() < 1) {

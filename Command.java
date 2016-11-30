@@ -17,7 +17,7 @@ public class Command {
 			//Might want to switch to doing split on ; and && to break everything up first?
 	public static ArrayList<Command> GenerateCommands(String input) {
 		Scanner read = new Scanner(input);
-		String[] validCommands = new String[] {"rm","find","mv","ls","exit","clear","cd","cat","pwd","cp","chmod","ssh","nano","scp","head","tail","mkdir"};
+		String[] validCommands = new String[] {"zip","unzip","tar","rm","find","mv","ls","exit","clear","cd","cat","pwd","cp","chmod","ssh","nano","scp","head","tail","mkdir"};
 		
 		ArrayList<Command> commands = new ArrayList<Command>();
 		Command newComm = null;
