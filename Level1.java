@@ -11,7 +11,8 @@ public class Level1 {
 	JTextPane output;
 	int stepCount;
 	Directory location;
-	
+
+	Directory baggage;
 	Directory cat;
 	Directory apep;
 	Directory ra;
@@ -19,12 +20,15 @@ public class Level1 {
 	Directory pyramid4;
 	Directory gg;
 	Directory hh;
-	
+	Directory treasure;
+
+	File lugg;
+	File slab;
 	File dotFeline;
 	File apepp;
 	File rra;
 	File serpent;
-	
+
 	public Level1(JTextPane output) {
 		this.output = output;
 		stepCount = 0;
@@ -32,224 +36,299 @@ public class Level1 {
 		output.setEditable(false);
 		output.setPreferredSize(new Dimension(200, 200));
 	}
-	
+
 	public boolean playLevel1(Command cmd) {
 		String command = cmd.getCommand();
-		if(stepCount == 34 && (location.name().equals("GrandGallery") || location.name().equals("HypostyleHall"))) {
+		if(stepCount == 26 && (location.name().equals("GrandGallery") || location.name().equals("HypostyleHall"))) {
 			if(checkWinCons()) {
-				output.setText("After moving the statues to their appropriate locations, a small door opened in the wall.<br>It contained a priceless Frog Amulet, made of pure gold and inlaid with gemstones.<br>Let's take this back to the library for some more research!");
-				return true;
+				output.setText("Once all of the statues have been inserted into the wall, an ancient mechanism deeper in the pyramid spurs to life. A great door opens in the Hypostyle Hall.");
+				hh.addDirectory(treasure);
+				stepCount++;
 			}
 		}
 		if(stepCount == 0) {
-			output.setText("While doing research in the library, Dr. [you] finds a treasure map tucked away in the stacks.<br>It appears to lead to a previously undiscovered pyramid in Giza that contains relics that belong<br>in a museum.  Let's go on an adventure!<br>[Enter]");
+			output.setText("While researching frogs in the Library, Dr. [player name] comes across directions to a previously undiscovered pyramid. The directions make mention of a previously undiscovered treasure that definitely belongs in a museum. Excited by this new information, Dr. [player name] is ready to set off on an adventure! [Enter]");
 			stepCount++;
-		} else if(command.equals("pwd") && stepCount == 5 && location.name().equals("Library")) {
-			output.setText("pwd works like a compass to help us get our bearings in the system.<br>Each slash represents a directory level. /library is to the right of /city, so that tells us the library is in the city.<br>[Enter]");
-			stepCount++;
-		} else if(command.equals("cd")) {
-			if(stepCount == 8 && location.name().equals("City")) {
-				stepCount++;
-				output.setText("The map says the new pyramid is in Giza.  That's<br>way too far for a penguin to fly, so let's go to the airport.<br>[Enter]");
-			} else if(stepCount == 19 && location.name().equals("Egypt")) {
-				output.setText("Thank goodness for time-saving montages. That felt way shorter than 15 hours.<br>[Enter]");
-				stepCount++;
-			} else if(stepCount == 11 && location.name().equals("Airport")) {
-				output.setText("Before we take off, let's get our baggage to the baggage check.<br>[Enter]");
-				stepCount++;
-			} else if(stepCount == 23) {
-				if(location.name().equals("Alexandria")) {
-					output.setText("Whoops. Took a wrong turn. In Linux, to get back to<br>your previous working directory, use the command cd -");
-				} else if(location.name().equals("Giza")) {
-					output.setText("Finally made it to Giza, now to find that pyramid your research uncovered.<br>Try the ls command to pull up the map and see what's here.");
+		} else if(command.equals("pwd")) {
+			 if (stepCount == 3 && location.name().equals("Library")) {
+					output.setText("<b>pwd</b> works like a compass to help us get our bearings in the system. Each slash represents a directory, since the /library directory is to the right of the /city directory it means that the library is contained within the city. This is the basis for the path system. [Enter]");
 					stepCount++;
-				} else if(location.name().equals("Egypt")) {
-					output.setText("From the airport you can get to Giza or Alexandria. Type cd Giza to get to Giza.");
-				}
-			} else if(stepCount == 33) {
-				output.setText("Remember what you've learned.  Use this knowledge well, and the temple will yield its secrets!");
+			}
+		} else if(command.equals("cd")) {
+			if(stepCount == 5) {
+				output.setText("Now that you have yourself in another directory, an easy way to navigate to the parent directory is to use ‘<b>cd ..</b>’ Use it twice now to get into the library’s parent directory, the city.");
 				stepCount++;
-			} else if(stepCount == 31 && location.name().equals(".PyramidOfHeket")) {
-				output.setText("We're in! It looks nobody has set foot in here in centuries. Let's see what's here. Why don't you open your map again?");
+			} else if (stepCount == 6 && location.name().equals("City")) {
+				output.setText("The map says that the undiscovered pyramid is in Giza. That’s way too far for a penguin to fly! I’ll have to get to the <b>Airport</b>! Use <b>ls</b> and <b>cd</b> to get there.");
+				stepCount++;
+			} else if (stepCount == 7 && location.name().equals("Airport")) {
+				output.setText("Welcome to the airport! The baggage check is here, please move your check bag before boarding your plane. [Enter]");
+				stepCount++;
+			} else if (stepCount == 11 && location.name().equals("Egypt")) {
+				output.setText("Thank goodness for time-saving montages, that felt way shorter than 15 hours. [Enter]");
+				stepCount++;
+			} else if (stepCount == 17 && location.name().equals(".PyramidOfHeket")) {
+				output.setText("Looks like the pyramid is sealed shut, but that slab looks suspiciously like a door. [Enter]");
+				stepCount++;
+			} else if (stepCount == 13) {
+				if (location.name().equals("Giza")) {
+					output.setText("Finally made it to Giza, now to find that pyramid your research uncovered. I should look around for it.");
+					stepCount++;
+				} else {
+					output.setText("Whoops! Looks like I took a wrong turn! In linux, you can quickly navigate back to your previous working directory by using the <b>cd</b> command <b>cd -</b>. You'll head back to Egypt then <b>cd</b> to Giza.");
+				}
+			} else if (stepCount == 21) {
+				if (location.name().equals("GrandGallery")) {
+					output.setText("To move a file: <b>mv [filename] [destination directory]</b> | To rename a file or directory: <b>mv [old name] [new name]</b> | Go to a specific directory: <b>cd [directory name]</b> | Go to the parent directory: <b>cd ..</b> | Go to the previous working directory: <b>cd -</b> | View directory contents: <b>ls</b> | View all directory contents: <b>ls -a</b>");
+					stepCount++;
+				} else if (location.name().equals("HypostyleHall")) {
+					output.setText("To move a file: <b>mv [filename] [destination directory]</b> | To rename a file or directory: <b>mv [old name] [new name]</b> | Go to a specific directory: <b>cd [directory name]</b> | Go to the parent directory: <b>cd ..</b> | Go to the previous working directory: <b>cd -</b> | View directory contents: <b>ls</b> | View all directory contents: <b>ls -a</b>");
+				}
+			} else if (stepCount == 25 && location.name().equals("HypostyleHall")) {
+				output.setText("To move a file: <b>mv [filename] [destination directory]</b> | To rename a file or directory: <b>mv [old name] [new name]</b> | Go to a specific directory: <b>cd [directory name]</b> | Go to the parent directory: <b>cd ..</b> | Go to the previous working directory: <b>cd -</b> | View directory contents: <b>ls</b> | View all directory contents: <b>ls -a</b>");
+				stepCount++;
+			} else if (stepCount == 29 && location.name().equals("Library")) {
+				output.setText("");
+				return true;
+			} else if (stepCount == 27 && location.name().equals("TreasureRoom")) {
+				output.setText("Inside the Treasure room, there are many artifacts from ancient Egypt. One amulet, however stands out from the rest. The amulet is in the shape of a frog, a traditional of Heket. There is more to the amulet than what it appears; perhaps there is something in the library about it. [Enter]");
 				stepCount++;
 			}
 		} else if(command.equals("ls")) {
 			if(stepCount == 2 && location.name().equals("Library")) {
-				output.setText("In Linux, the ls command lists files and other directories in your current working directory.<br>[Enter]");
+				output.setText("In Linux, the <b>ls</b> command lists files and directories in the current working directory. A directory is a folder that can hold files and/or other directories. Try the <b>pwd</b> command now.");
 				stepCount++;
-			} else if(stepCount == 10 && location.name().equals("City")) {
-				output.setText("You can move into listed sub-directories in the<br>city by using the cd command again.<br>By typing cd <directory name> you can move directly to that directory.<br>So to get to the airport, type cd Airport.");
+			} else if (stepCount == 14 && location.name().equals("Giza")) {
+				output.setText("Hmm. Nothing new showed up, but looking at the map in the sun, it looks like there’s some sort of invisible ink… [Enter]");
 				stepCount++;
-			} else if(stepCount == 22 && location.name().equals("Egypt")) {
-				output.setText("Huh. Looks like your luggage was lost. Guess it'll show up eventually.<br>From the airport you can get to Giza or Alexandria.");
+			} else if (stepCount == 16 && location.name().equals("Giza")) {
+				output.setText("Most pyramids are burial chambers for pharaohs, but Heket was the Goddess of Frogs. This definitely seems worth further exploration");
 				stepCount++;
-			} else if(stepCount == 24 && location.name().equals("Giza")) {
-				output.setText("Hmm. Nothing new showed up, but looking at the map in the sun, it looks like there's some<br> kind of invisible ink...<br>[Enter]");
+			} else if (stepCount == 20 && location.name().equals(".PyramidOfHeket")) {
+				output.setText("Remember that you are able to traverse a directory system using the <b>cd</b> command. Try navigating to the GrandGallery or the HypostyleHall now.");
 				stepCount++;
-			} else if(stepCount == 26 && location.name().equals("Giza")) {
-				output.setText("Most pyramids are burial chambers for pharaohs, but Heket was the Goddess of Frogs.<br>This definitely seems worth further exploration.<br>[Enter]");
+			} else if (stepCount == 22 && location.name().equals("GrandGallery") && cmd.getFlags().size() > 0) {
+				output.setText("There was a statue hidden in this room! But it looks stuck to the floor. I’ll have to make a cast of it so I can copy it. [Enter]");
 				stepCount++;
-			} else if(stepCount == 32 && location.name().equals(".PyramidOfHeket")) {
-				output.setText("The GrandGallery and HypostyleHall are the subdirectories in .PyramidOfHeket.<br>They can be opened with the cd [directory name] command.<br>If you want to explore the GrandGallery, type cd GrandGallery.<br>If you want to explore the HypostyleHall, type cd HypostyleHall.");
-				stepCount++;
-			} 
-		} else if(stepCount == 12 && location.name().equals("Airport")) {
-			output.setText("To move files, Linux uses the mv command.<br>[Enter]");
-			stepCount++;
+			}
 		} else if(command.equals("mv")) {
-			if(stepCount == 15 && location.name().equals("Airport")) {
-				output.setText("Now we can head to Egypt using the cd command.<br>[Enter]");
+			if (stepCount == 9 && location.name().equals("Airport") && baggage.getFiles().contains(lugg)) {
+				output.setText("Woah there! You shouldn’t go through security with your terminal all cluttered! Use the <b>clear</b> command to clean that right up!");
 				stepCount++;
-			} else if(stepCount == 29 && location.name().equals("Giza")) {
-				output.setText("That did the trick! Now we can gain access to the pyramid rooms.<br>[Enter]");
+			} else if (stepCount == 19 && location.name().equals(".PyramidOfHeket") && slab.getName().equals("door.txt")) {
+				output.setText("That did the trick! Now let's check the map to see the pyramid's rooms.");
 				pyramid4.addDirectory(gg);
 				pyramid4.addDirectory(hh);
 				stepCount++;
 			}
-		} else if(command.equals("clear") && stepCount == 17 && location.name().equals("Airport")) {
-			output.setText("Great! Now let's see if you can take the red-eye to Egypt.<br>[Enter]");
-			stepCount++;
+
+		} else if(command.equals("clear")) {
+			if (stepCount == 10 && location.name().equals("Airport")) {
+				output.setText("Giza is located in Egypt, I should get on the direct flight there. (Hint: you'll want to use <b>cd</b> and maybe <b>ls</b>)");
+				stepCount++;
+			}
+
 		} else if(command.equals("")) {
 			if(stepCount == 1 && location.name().equals("Library")) {
-				output.setText("Type ls to open the map.");
-				stepCount++;
-			} else if(stepCount == 3 && location.name().equals("Library")) {
-				output.setText("So now we know everything that's in the library, but what about<br>what's outside the library?<br>[Enter]");
+				output.setText("The command line (located below) takes in commands and runs them. One of the most useful commands is the <b>ls</b> command. Use <b>ls</b> now to open map");
 				stepCount++;
 			} else if(stepCount == 4 && location.name().equals("Library")) {
-				output.setText("To find out where we currently are, we can use the command pwd.");
+				output.setText("Another useful command is <b>cd</b>. Using it, the user can change their working directory. The syntax, or structure, of <b>cd</b> is ‘<b>cd <directoryName></b>’. Try navigating into one of the directories located in the library. NOTE: The <b>cd</b> command does not inherently know where every directory is in the computer. When inputting the directory name, the user might have to include that directory’s path.");
 				stepCount++;
-			} else if(stepCount == 6 && location.name().equals("Library")) {
-				output.setText("To move around in the terminal, use cd.<br>[Enter]");
+			} else if (stepCount == 8 && location.name().equals("Airport")) {
+				output.setText("The <b>mv</b> command moves items in Linux directories. <b>mv</b>’s format is: ‘<b>mv [file name] [destination directory]</b>'. Move your luggage to the BaggageClaim.");
 				stepCount++;
-			} else if(stepCount == 7 && location.name().equals("Library")) {
-				output.setText("Type cd .. to move up to the parent directory.  In this case, the city is the parent directory for the<br>library, which is where we want to go!");
+			} else if (stepCount == 12 && location.name().equals("Egypt")) {
+				output.setText("Now to Giza!");
 				stepCount++;
-			} else if(stepCount == 9 && location.name().equals("City")) {
-				output.setText("Type ls to open the map.");
+			} else if (stepCount == 15 && location.name().equals("Giza")) {
+				output.setText("In Linux, files that begin with a dot ‘.’ do not show up with a normal <b>ls</b> command. Most commands in linux allow arguments to add extra functionalities to the base command. Arguments are added after the base command. An example is <b>ls</b>, adding <b>-a</b> after ls will cause the command to print ‘.’ files in addition to normal ones. Go, ahead try using <b>ls -a</b>.");
 				stepCount++;
-			} else if(stepCount == 13 && location.name().equals("Airport")) {
-				output.setText("The format for the mv command is: mv [file name] [directory path].  You can type pwd to see your current directory path<br>if you forget.<br>[Enter]");
+			} else if (stepCount == 18 && location.name().equals(".PyramidOfHeket")) {
+				output.setText("In Linux, in addition to moving files, the <b>mv</b> command can rename files. The format for this is <b>mv [original filename] [new filename]</b>. Try turning the slab into a door.");
 				stepCount++;
-			} else if(stepCount == 14 && location.name().equals("Airport")) {
-				output.setText("So, to move our luggage to the baggage check type: mv Luggage.txt BaggageCheck<br>(Hint: you can use ls at any time to see file and directory names at your location.");
+			} else if (stepCount == 23 && location.name().equals("GrandGallery")) {
+				output.setText("In Linux, you can make a copy of a file or directory with the <b>cp</b> command. The format is <b>cp [source file] [file path for directory you want it copied to]</b>. Try copying the feline statue now to the HypostyleHall.");
 				stepCount++;
-			} else if(stepCount == 16 && location.name().equals("Airport")) {
-				output.setText("By now the terminal screen is probably full of text. Let's declutter. To clear the terminal at any time, type clear.");
+			} else if (stepCount == 28 && location.name().equals("TreasureRoom")) {
+				output.setText("To quickly return to the home directory in Linux, you can <b>cd /home</b>. Use it now to end this adventure.");
 				stepCount++;
-			} else if(stepCount == 18 && location.name().equals("Airport")) {
-				output.setText("Looks like there's a direct flight, let's go! Use the cd command to fly to Egypt.");
-				stepCount++;
-			} else if(stepCount == 20 && location.name().equals("Egypt")) {
-				output.setText("Our research pointed us toward the hidden pyramid in Giza.<br>[Enter]");
-				stepCount++;
-			} else if(stepCount == 21 && location.name().equals("Egypt")) {
-				output.setText("Finding Giza works the same way as flying to Egypt from the airport.<br>Type ls to pull up the map and see what places there are to go.");
-				stepCount++;
-			} else if(stepCount == 23) {
-				if(location.equals("Egypt")) {
-					output.setText("Type cd Giza to go to Giza.");
-				} else if(location.equals("Alexandria")) {
-					output.setText("Type cd - to return to your previous working directory.");
-				}
-			} else if(stepCount == 25 && location.name().equals("Giza")) {
-				output.setText("In Linux, .[name] files don't show up with a normal ls command. To see everything in a directory, type ls -a.");
-				stepCount++;
-			} else if(stepCount == 30 && location.name().equals("Giza")) {
-				output.setText("Let's step inside. Use the cd command to enter Heket's pyramid.");
-				stepCount++;
-			} else if(stepCount == 27 && location.name().equals("Giza")) {
-				output.setText("Looks like the pyramid is sealed shut, but that slab looks suspiciously like a door.<br>In Linux, in addition to moving files, the mv command can rename files. The format for this is mv [filename] [new filename].<br>[Enter]");
-				stepCount++;
-			} else if(stepCount == 28 && location.name().equals("Giza")) {
-				output.setText("To turn the slab into a door, use the mv command: mv .slab.txt door.txt");
+			}
+		} else if (command.equals("cp")) {
+			if (stepCount == 24 && location.name().equals("GrandGallery")) {
+				output.setText("We should check HypostyleHall now.");
 				stepCount++;
 			}
 		}
 		return false;
 	}
-	
+
 	protected void setLocation(Directory d) {
 		location = d;
 	}
-	
+
 	protected void devMode(int n) {
 		stepCount = n;
 	}
-	
+
 	protected Directory buildLevel(Directory root) {
 		Directory lv1 = new Directory("Level1", root, new ArrayList<Directory>(), new ArrayList<File>());
 		Directory city = new Directory("City", lv1, new ArrayList<Directory>(), new ArrayList<File>());
 		lv1.addDirectory(city);
-		
+
 		Directory library = new Directory("Library", city, new ArrayList<Directory>(), new ArrayList<File>());
 		city.addDirectory(library);
 		library.addFile(new File("archaeology.txt", ""));
 		library.addFile(new File("HowToLinux.txt", ""));
 		library.addFile(new File("heket.txt", ""));
 		library.addFile(new File("frogs.txt", ""));
-		
+
+		Directory scienceFiction = new Directory("ScienceFiction", library, new ArrayList<Directory>(), new ArrayList<File>());
+    Directory religion = new Directory("Religion", library, new ArrayList<Directory>(), new ArrayList<File>());
+    Directory fiction = new Directory("Fiction", library, new ArrayList<Directory>(), new ArrayList<File>());
+    Directory nonFiction = new Directory("NonFiction", library, new ArrayList<Directory>(), new ArrayList<File>());
+    Directory entertainment = new Directory("Entertainment", library, new ArrayList<Directory>(), new ArrayList<File>());
+    Directory academia = new Directory("Academia", library, new ArrayList<Directory>(), new ArrayList<File>());
+    Directory childrens = new Directory("Childrens", library, new ArrayList<Directory>(), new ArrayList<File>());
+    Directory art = new Directory("Art", library, new ArrayList<Directory>(), new ArrayList<File>());
+    Directory science = new Directory("Science", library, new ArrayList<Directory>(), new ArrayList<File>());
+
+    Directory health = new Directory("Health", science, new ArrayList<Directory>(), new ArrayList<File>());
+    Directory math = new Directory("Math", science, new ArrayList<Directory>(), new ArrayList<File>());
+
+    Directory anthology = new Directory("Anthology", art, new ArrayList<Directory>(), new ArrayList<File>());
+    Directory poetry = new Directory("Poetry", art, new ArrayList<Directory>(), new ArrayList<File>());
+
+    Directory comics = new Directory("Comics", entertainment, new ArrayList<Directory>(), new ArrayList<File>());
+    Directory drama = new Directory("Drama", entertainment, new ArrayList<Directory>(), new ArrayList<File>());
+    Directory cookbook = new Directory("Cookbooks", entertainment, new ArrayList<Directory>(), new ArrayList<File>());
+    Directory satire = new Directory("Satire", entertainment, new ArrayList<Directory>(), new ArrayList<File>());
+    Directory romance = new Directory("Romance", entertainment, new ArrayList<Directory>(), new ArrayList<File>());
+
+    Directory mystery = new Directory("Mystery", fiction, new ArrayList<Directory>(), new ArrayList<File>());
+    Directory horror = new Directory("Horror", fiction, new ArrayList<Directory>(), new ArrayList<File>());
+    Directory actionAdventure = new Directory("ActionAdventure", fiction, new ArrayList<Directory>(), new ArrayList<File>());
+
+    Directory journals = new Directory("Journals", academia, new ArrayList<Directory>(), new ArrayList<File>());
+    Directory encyclopedia = new Directory("Encyclopedia", academia, new ArrayList<Directory>(), new ArrayList<File>());
+    Directory dictionaries = new Directory("Dictionaries", academia, new ArrayList<Directory>(), new ArrayList<File>());
+    Directory diaries = new Directory("Diaries", academia, new ArrayList<Directory>(), new ArrayList<File>());
+    Directory guide = new Directory("Guide", academia, new ArrayList<Directory>(), new ArrayList<File>());
+
+    Directory biography = new Directory("Biography", nonFiction, new ArrayList<Directory>(), new ArrayList<File>());
+    //Directory selfHelp = new Directory("SelfHelp", nonFiction, new ArrayList<Directory>(), new ArrayList<File>());
+    Directory travel = new Directory("Travel", nonFiction, new ArrayList<Directory>(), new ArrayList<File>());
+    Directory history = new Directory("History", nonFiction, new ArrayList<Directory>(), new ArrayList<File>());
+    Directory selfHelp = new Directory("SelfHelp", nonFiction, new ArrayList<Directory>(), new ArrayList<File>());
+
+    Directory fantasy = new Directory("Fantasy", scienceFiction, new ArrayList<Directory>(), new ArrayList<File>());
+
+    library.addDirectory(scienceFiction);
+    library.addDirectory(fiction);
+    library.addDirectory(nonFiction);
+    library.addDirectory(entertainment);
+    library.addDirectory(science);
+    library.addDirectory(religion);
+    library.addDirectory(art);
+    library.addDirectory(academia);
+    library.addDirectory(childrens);
+
+    scienceFiction.addDirectory(fantasy);
+
+    fiction.addDirectory(mystery);
+    fiction.addDirectory(horror);
+    fiction.addDirectory(actionAdventure);
+
+    nonFiction.addDirectory(biography);
+    nonFiction.addDirectory(travel);
+    nonFiction.addDirectory(history);
+    //nonFiction.addDirectory(selfHelp);
+
+    entertainment.addDirectory(romance);
+    entertainment.addDirectory(comics);
+    entertainment.addDirectory(satire);
+    entertainment.addDirectory(drama);
+    entertainment.addDirectory(cookbook);
+
+    science.addDirectory(health);
+    science.addDirectory(math);
+
+    art.addDirectory(anthology);
+    art.addDirectory(poetry);
+
+    academia.addDirectory(guide);
+    academia.addDirectory(journals);
+    academia.addDirectory(encyclopedia);
+    academia.addDirectory(dictionaries);
+    academia.addDirectory(diaries);
+
+
 		Directory home = new Directory("Home", city, new ArrayList<Directory>(), new ArrayList<File>());
 		city.addDirectory(home);
-		
+
 		Directory airport = new Directory("Airport", city, new ArrayList<Directory>(), new ArrayList<File>());
-		airport.addFile(new File("Luggage.txt", ""));
+		lugg = new File("luggage.txt", "Clothes. Toothbrush. Hair brush.");
+		airport.addFile(lugg);
 		city.addDirectory(airport);
-		
-		Directory baggage = new Directory("BaggageCheck", airport, new ArrayList<Directory>(), new ArrayList<File>());
+
+		baggage = new Directory("BaggageClaim", airport, new ArrayList<Directory>(), new ArrayList<File>());
 		Directory egypt = new Directory("Egypt", airport, new ArrayList<Directory>(), new ArrayList<File>());
 		Directory giza = new Directory("Giza", egypt, new ArrayList<Directory>(), new ArrayList<File>());
 		Directory alexandria = new Directory("Alexandria", egypt, new ArrayList<Directory>(), new ArrayList<File>());
 		Directory minnesota = new Directory("Minnesota", airport, new ArrayList<Directory>(), new ArrayList<File>());
 		Directory bathroom = new Directory("Bathrooms", airport, new ArrayList<Directory>(), new ArrayList<File>());
-		
+
 		airport.addDirectory(minnesota);
 		airport.addDirectory(bathroom);
 		airport.addDirectory(baggage);
 		airport.addDirectory(egypt);
 		egypt.addDirectory(giza);
 		egypt.addDirectory(alexandria);
-		
+
 		Directory pyramid1 = new Directory("PyramidOofMenKaure", giza, new ArrayList<Directory>(), new ArrayList<File>());
 		Directory pyramid2 = new Directory("PyramidOfKhafre", giza, new ArrayList<Directory>(), new ArrayList<File>());
 		Directory pyramid3 = new Directory("PyramidOfKhufu", giza, new ArrayList<Directory>(), new ArrayList<File>());
 		pyramid4 = new Directory(".PyramidOfHeket", giza, new ArrayList<Directory>(), new ArrayList<File>());
-		
+
 		giza.addDirectory(pyramid1);
 		giza.addDirectory(pyramid2);
 		giza.addDirectory(pyramid3);
 		giza.addDirectory(pyramid4);
-		
-		giza.addFile(new File(".slab.txt", ""));
-		
+
+		slab = new File("slab.txt", "DO YOU WISH THE ENTAH?");
+		pyramid4.addFile(slab);
+
 		gg = new Directory("GrandGallery", pyramid4, new ArrayList<Directory>(), new ArrayList<File>());
 		hh = new Directory("HypostyleHall", pyramid4, new ArrayList<Directory>(), new ArrayList<File>());
-		
+
 		dotFeline = new File(".feline.txt", "");
 		serpent = new File("Serpent.txt", "");
 		rra = new File("Ra.txt", "");
 		apepp = new File("Apep.txt", "");
-		
+
 		gg.addFile(dotFeline);
 		hh.addFile(serpent);
 		hh.addFile(rra);
 		hh.addFile(apepp);
-		
+
 		cat = new Directory("Cat", hh, new ArrayList<Directory>(), new ArrayList<File>());
 		snake = new Directory("Snake", hh, new ArrayList<Directory>(), new ArrayList<File>());
 		ra = new Directory("Ra", hh,  new ArrayList<Directory>(), new ArrayList<File>());
 		apep = new Directory("Apep", hh, new ArrayList<Directory>(), new ArrayList<File>());
-		
+
 		hh.addDirectory(cat);
 		hh.addDirectory(snake);
 		hh.addDirectory(ra);
 		hh.addDirectory(apep);
-		
-		
-		
+
+		treasure = new Directory("TreasureRoom", hh, new ArrayList<Directory>(), new ArrayList<File>());
+
+		treasure.addFile(new File("amulet.txt", "Frog frog frog"));
+
+
 		return library;
 	}
-	
+
 	private boolean checkWinCons() {
 		if(snake.getFiles().contains(serpent) && apep.getFiles().contains(apepp) && ra.getFiles().contains(rra)) {
 			for(File f : cat.getFiles()) {
