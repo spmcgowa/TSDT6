@@ -117,6 +117,18 @@ public class CommandStream implements ActionListener {
 				error = chmod(command);
 			} else if (command.getCommand().equals("ssh")) {
 				error = ssh(command);
+			} else if (command.getCommand().equals("find")) {
+				error = find(command);
+			} else if (command.getCommand().equals("rm")) {
+				error = rm(command);
+			} else if (command.getCommand().equals("tar")) {
+				error = tar(command);
+			} else if (command.getCommand().equals("zip")) {
+				error = zip(command);
+			} else if (command.getCommand().equals("unzip")) {
+				error = unzip(command);
+			} else {
+				error = new TerminalError("Command was read as valid, but the CommandStream did not recognize it.");
 			}
 			
 			//Handle Errors!
@@ -219,7 +231,7 @@ public class CommandStream implements ActionListener {
 				}
 			} else if(("-").equals(tokens[i])) {
 				if(prevDir == null) {
-					output.append("No previous directory available.");
+					output.append("No previous directory available.\n");
 				} else {
 					//Directory temp = currentDirectory;
 					cDir = prevDir;
@@ -255,6 +267,30 @@ public class CommandStream implements ActionListener {
 		return searchR;
 	}
 	
+	public boolean compareSearchResults(SearchResults a, SearchResults b) {
+		//Begin comparing
+		if (a.lastFoundDir.equals(b.lastFoundDir)) {
+			//They share the exact same result directory.
+			if (a.endsWithFile != b.endsWithFile) {
+				return false;
+			}
+			else if (a.endsWithFile) {
+				// the case that both are files
+				File f1 = findFile(a.lastToken,a.lastFoundDir);
+				File f2 = findFile(b.lastToken,b.lastFoundDir);
+				if (f1.equals(f2)) {
+					return true;
+				}
+			}
+			else {
+				//the case that both are directories, we already checked if they are equal to get this far
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	public void sendOutput(String out) {
 		output.append(out);
 	}
@@ -263,12 +299,512 @@ public class CommandStream implements ActionListener {
 		currentDirectory = d;
 	}
 	
+	public boolean compareWithWildcards(String a, String b) {
+		return a.matches(b.replaceAll("\\*",".*")) || b.matches(a.replaceAll("\\*",".*"));
+	}
+	
 	//End block of Helper Methods
 	// ----------------------------------------------------------------------------------------------------------------------
 	
 	
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------
 	// Methods to execute Commands with the Command Class
+
+	//----------------------------------------------------------
+		// Command: zip
+				// Description: bundles a group of files and directories, basically a simplified version of tar in our setup
+			// Input
+				// Required: bundled name, at least one file to add
+				// Optional: None
+			// Flags
+				// [TODO] fill this in
+		//-----------------------------------------------------------
+	public TerminalError zip(Command command) {
+		if (command.getInputs().size() < 2) {
+			return new TerminalError("Not enough arguments.\n");
+		}
+		String ret = "tar -czf ";
+		for (String s : command.getInputs()) {
+			ret += s;
+			ret += " ";
+		}
+		System.out.println("Converted zip command to: " + ret);
+		return tar(Command.GenerateCommands(ret).get(0));
+	}
+	
+	public TerminalError unzip(Command command) {
+		if (command.getInputs().size() < 1) {
+			return new TerminalError("Not enough arguments.\n");
+		}
+		String ret = "tar -xf ";
+		for (String s : command.getInputs()) {
+			ret += s;
+			ret += " ";
+		}
+		System.out.println("Converted unzip command to: " + ret);
+		return tar(Command.GenerateCommands(ret).get(0));
+	}
+	
+	
+	
+	
+	//----------------------------------------------------------
+	// Command: tar
+			// Description: bundles a group of files and directories
+		// Input
+			// Required: bundled name, at least one file to add
+			// Optional: None
+		// Flags
+			// [TODO] fill this in
+	//-----------------------------------------------------------
+	public TerminalError tar(Command command) {
+		if (command.getInputs().size() < 1) {
+			return new TerminalError("Not enough arguments.\n");
+		}
+		
+		String flags = "";
+		//Cram all of these flags together
+		for (int i = 0; i < command.getFlags().size(); i++) {
+			flags += command.getFlags().get(i);
+		}
+		/*
+		-c Create a tar // Exclusive with x
+		-x Extract tar Contents // Exclusive with c
+
+		-f Display what is going on while running the command
+
+		-t Display a finished tarball's contents
+		-v Display Verbose information for a tarball's contents 
+
+		-z Create a gzip file // Useless for our thing, but needs to be accepted
+		-j create a bzip file // useless for our thing, but needs to be accepted as valid
+		
+		7 Possible flags
+		*/
+										//c		x		f		t		v	z		j
+		boolean[] bools = new boolean[] {false, false, false, false, false, false, false};
+		
+		for (int i = 0; i < flags.length(); i++) {
+			if (flags.charAt(i) == 'c') {
+				if (bools[1] == true || bools[3] == true || bools[4] == true)
+					return new TerminalError("You can only have one type of modification flag {c,x,t,v}.\n");
+				bools[0] = true;
+			}
+			else if (flags.charAt(i) == 'x') {
+				if (bools[0] == true || bools[3] == true || bools[4] == true)
+					return new TerminalError("You can only have one type of modification flag {c,x,t,v}.\n");
+				bools[1] = true;
+			}
+			else if (flags.charAt(i) == 'f') {
+				bools[2] = true;
+			}
+			else if (flags.charAt(i) == 't') {
+				if (bools[0] == true || bools[1] == true || bools[4] == true)
+					return new TerminalError("You can only have one type of modification flag {c,x,t,v}.\n");
+				bools[3] = true;
+			}
+			else if (flags.charAt(i) == 'v') {
+				bools[4] = true;
+			}
+			else if (flags.charAt(i) == 'z') {
+				if (bools[6] == true)
+					return new TerminalError("You can only have one type of modification flag {c,x,t,v}.\n");
+				bools[5] = true;
+			}
+			else if (flags.charAt(i) == 'j') {
+				if (bools[5] == true)
+					return new TerminalError("Invalid flags.");
+				bools[6] = true;
+			}
+			
+			
+		}
+		//compile how much information are we supposed to output, this will either be 0 for non, 1 for basic, 2 for verbose
+		int outputLevel = 0 + ( (bools[3] || bools[2]) ? 1 : 0) + (( (bools[4]) ? 2 : 0));
+		System.out.println("Decided to output at level " + outputLevel);
+		//Now do the right thing
+		if (bools[0] == true) {
+			System.out.println("Bundling");
+			bundleTar(command, outputLevel);
+		}
+		else if (bools[1] == true)  {
+			System.out.println("Unbundling");
+			unbundleTar(command, outputLevel);
+		}
+		else if (bools[3] == true) {
+			System.out.println("Displaying");
+			//Print a tarball's contents, check t of v for level of output
+			String path = command.getInputs().get(0);
+			SearchResults results = validateFilePath(path);
+			if (results.validPath)
+				return new TerminalError("Invalid file path.\n");
+			
+			File file = findFile(results.lastToken,results.lastFoundDir);
+			if (file == null) 
+				return new TerminalError("Invalid file path.\n");
+			if (file instanceof TarBall == false)
+				return new TerminalError("Not a tar/zip file.\n");
+			outputBundle(((TarBall) file).getItems(), outputLevel);
+		}
+		else {
+			return  new TerminalError("Invalid flags.");
+		}
+		
+		return null;
+	}
+	
+	private void outputBundle(ArrayList<Object> items, int outputLevel) {
+		if (outputLevel == 0) return;
+		System.out.println("Attemtping to output bundle, item count " + items.size());
+		if (outputLevel == 1) {
+			for (Object o : items) {
+				if (o instanceof File) {
+					sendOutput( ((File)o).getName() + "\n");
+				}
+				else {
+					sendOutput( ((Directory)o).name() + "\n");
+				}
+			}
+		}
+		else if (outputLevel > 1) {
+			//[TODO] do something here?
+		}
+	}
+	
+	private TerminalError unbundleTar(Command command, int outputLevel) {
+		//analyze the path
+		String path = command.getInputs().get(0);
+		SearchResults results = validateFilePath(path);
+		//Check if path is valid
+		if (results.endsWithFile == false)
+			return new TerminalError("Invalid file path.\n");
+		File file = findFile(results.lastToken,results.lastFoundDir);
+		//Check if file is valid
+		if (file == null)
+			return new TerminalError("Not a valid file.\n");
+		// check if this is actually a bundle file
+		if (file instanceof TarBall == false)
+			return new TerminalError("Not a tar/zip file.\n");
+		TarBall bundle = (TarBall) file;
+		outputBundle(bundle.getItems(),outputLevel);
+		//Unpack everything
+		System.out.println("Items to unbundle: " + bundle.getItems().size());
+		for (int i = 0; i < bundle.getItems().size(); i++) {
+			if (bundle.getItems().get(i) instanceof File) {
+				File f = (File)bundle.getItems().get(i);
+				currentDirectory.addFile(f);
+			}
+			else {
+				Directory d = (Directory)bundle.getItems().get(i);
+				currentDirectory.addDirectory(d);
+			}
+		}
+		return null;
+	}
+	
+	
+	private TerminalError bundleTar(Command command, int outputLevel) {
+		//The path for our new file
+		String outputPath = command.getInputs().get(0);
+		SearchResults outputSearch = validateFilePath(outputPath);
+		
+		if (outputSearch.validPath == false)
+			return new TerminalError("Invalid output path.");
+		
+		//We need to prep the inputs a little, because we can name both a file and that files parent directory,
+		//but we only really need to include the directory and we do not want to add a directory first;
+		ArrayList<String> prepInputs = command.getInputs();
+		prepInputs.remove(0); //remove the output path that is included in the command inputs
+		
+		for (int i = prepInputs.size() - 1; i >= 0 ; i--) {
+			//Get the path for the item
+			String itemPath = command.getInputs().get(i);
+			SearchResults itemSearch = validateFilePath(itemPath);
+			if (itemSearch.validPath == false)
+				return new TerminalError("Invalid file path.");
+			//First check for duplicates
+			//Loop through all other inputs, check if they match the current one and remove it if they do 
+			for (int j = prepInputs.size() - 1; j >= 0 ; j--) {
+				if (i==j) continue; // Dont delete the original thing we were checking
+				
+				//Prep the second items information
+				String itemPath2 = command.getInputs().get(j);
+				SearchResults itemSearch2 = validateFilePath(itemPath2);
+				if (itemSearch2.validPath == false)
+					return new TerminalError("Invalid file path.");
+				
+				//Compare them
+				if (compareSearchResults(itemSearch,itemSearch2) == true) {
+					System.out.println("Pruned " + prepInputs.get(j) + " from the inputs.");
+					prepInputs.remove(j);
+				}
+				
+			}
+				
+			//Now as an additional step of prep, we need to run through all inputs and see if 
+			//they are a higher level in the hierarchy and remove the lower levels
+			//For example, if we want to bundle dir1 and dir1/file1, file1 is already getting included
+			// at a higher point in the hierarchy so we want to remove it from the inputs to avoid errors.
+			if (itemSearch.endsWithFile == false) { //do not need to check files
+				String truePath1 = itemSearch.lastFoundDir.getPath();
+				for (int j = prepInputs.size() - 1; j >= 0 ; j--) {
+					if (i==j) continue; // Dont delete the original thing we were checking
+					//Prep the second items information
+					String itemPath2 = command.getInputs().get(j);
+					SearchResults itemSearch2 = validateFilePath(itemPath2);
+					if (itemSearch2.validPath == false)
+						return new TerminalError("Invalid file path.");
+					String truePath2 = itemSearch.lastFoundDir.getPath();
+					//We add a wildcard to the end of the first file path, 
+					//so if this is higher up the hierarchy they will be equal!
+					if (compareWithWildcards(truePath1 + "*", truePath2)) {
+						//This means we can remove the lower hierarchy one.
+						prepInputs.remove(j);
+					}
+				}	
+			}
+		}
+		System.out.println("Final file count: " + prepInputs.size());
+		//the inputs should now be properly prepped to avoid issues. 
+		
+		//This array list will hold all the items we are putting into the bundle
+		ArrayList<Object> items = new ArrayList<Object>();
+		for (int i = 0; i < prepInputs.size(); i++) {
+			//Get the path for the item
+			String itemPath = command.getInputs().get(i);
+			SearchResults itemSearch = validateFilePath(itemPath);
+			if (itemSearch.validPath == false)
+				return new TerminalError("Invalid file path.");
+			if (itemSearch.endsWithFile) {
+				File file = findFile(itemSearch.lastToken,itemSearch.lastFoundDir);
+				if (file != null) {
+					items.add(file);
+				}
+			}
+			else {
+				items.add(itemSearch.lastFoundDir);
+			}
+		}
+		
+		
+		System.out.println("Items to bundle: " + items.size());
+		TarBall bundle = new TarBall(outputSearch.lastToken,items);
+		outputSearch.lastFoundDir.addFile(bundle);
+		
+		outputBundle(items, outputLevel);
+		return null;
+	}
+	
+	//-----------------------------------------------------------
+	// Command: rm
+			// Description: removes a file or directory
+		// Input
+			// Required: path to file/direcotory
+			// Optional: None
+		// Flags
+			// -d -r
+	//-----------------------------------------------------------
+	public TerminalError rm(Command command) {
+		if (command.getInputs().size() < 1) {
+			return new TerminalError("Not enough arguments.\n");
+		}
+		
+		String path = command.getInputs().get(0);
+		SearchResults results = validateFilePath(path);
+		
+		if (results.validPath == false)
+			return new TerminalError("Invalid Path.");
+		
+		if (results.endsWithFile == false) {
+			boolean deleteDir = false; // Look for the two flags we are currently using
+			boolean  deleteRecur = false; 
+			for (int i = 0; i < command.getFlags().size();i++) 
+				if (compareWithWildcards(command.getFlags().get(i),"-d")) 
+					deleteDir = true;
+			for (int i = 0; i < command.getFlags().size();i++) 
+				if (compareWithWildcards(command.getFlags().get(i),"-r")) 
+					deleteRecur = true;
+			
+			if (deleteDir == false) {
+				return new TerminalError("rm: cannot remove ‘" + results.lastToken + "’: Is a directory. To remove a directory, use the -d flag.\n");
+			}
+			
+			//So because this is java, a recursive delete and a non recursive delete work out the same
+			// So we just need to check the one case when we do not want to delete this directory
+			// which is when it is not empty and we are not deleting recursively
+			if (results.lastFoundDir.isEmpty() == false && deleteRecur == false) {
+				return new TerminalError("rm: cannot remove ‘" + results.lastToken + "’: Is not empty. Use -r flag to remove an non empty directory, it will delete all things in the directory.\n");
+			}
+			
+			results.lastFoundDir.parent.remDir(results.lastFoundDir); // drop the directory
+			
+		}
+		else {
+			File file = findFile(results.lastToken, results.lastFoundDir);
+			if (file != null) {
+				results.lastFoundDir.delFile(file);
+			}
+			else {
+				return new TerminalError("rm: cannot remove "+ results.lastToken + ": No such file or directory\n");
+			}
+		}
+		
+		return null; 
+	}
+	
+	//-----------------------------------------------------------
+		// Command: Find
+				// Description: Finds directorys and files that fit the definitions, prints them to output
+			// Input
+				// Required: None
+				// Optional: path
+			// Flags
+				// None: maxdepth (i), iname (str), name (str), type (d/f), ! (yes!no), not, -o
+	//-----------------------------------------------------------
+	public TerminalError find(Command command) {
+		//Determine the path we are using, if it is input or if it is default
+		String path = "";
+		if (command.getInputs().size() > 0) {
+			path = command.getInputs().get(0);
+		}
+		else {
+			path = "";
+		}
+		
+		SearchResults results = validateFilePath(path); // Get if the path is valid
+		if (results.validPath == false) {
+			return new TerminalError("Invalid file path!\n");
+		}
+		
+		if (results.endsWithFile == true) { // If this is just one file we can skip alot of the hard work
+			File endpoint = findFile(results.lastToken, results.lastFoundDir);
+			if (endpoint != null) {
+				sendOutput(results.lastFoundDir.getPath() + endpoint.getName() + "\n"); // Print out just this file
+			}
+		}
+		
+		int maxdepth = Integer.MAX_VALUE;
+		char type = 'a'; // a for all
+		@SuppressWarnings("unchecked") // So the compiler doesn't complain about this
+		ArrayList<String> rules = (ArrayList<String>) command.getFlags().clone();
+		//remove the settings that change the search it self, IE those that are not constraints.
+		for (int i = 0; i < command.getFlags().size(); i++) {
+			//First lets check for flags that modify the search itself, and are not constraints
+			if (compareWithWildcards(command.getFlags().get(i),"-maxdepth*")) {
+				maxdepth = new Integer(command.getFlags().get(i).substring("-maxdepth".length()));
+				rules.remove(i); // Remove these from the rules
+			}
+			else if (compareWithWildcards(command.getFlags().get(i),"-type*")) {
+				type = command.getFlags().get(i).charAt(5);
+				rules.remove(i);
+				if (type != 'f' && type != 'd') return new TerminalError("Invalid type.\n");
+			}
+		}
+		//Check things recursively for those rules.
+		ArrayList<Directory> dirs = new ArrayList<Directory>();
+		dirs.add(results.lastFoundDir);
+		int cdepth = 0;
+		Directory depthTracker = dirs.get(0);
+		while (dirs.isEmpty() == false) {
+			for (Directory d : dirs.get(0).subDirectories) {
+				if (depthTracker != d.parent) {
+					cdepth++;
+					depthTracker = d; // This should work, because this is the first directory we will hit.
+				}
+				if (cdepth > maxdepth) {
+					break; // Exit!
+				}
+				dirs.add(d);
+			}
+			//Print this dir if it is valid, and type is a/d;
+			if (type != 'f') {
+				//Check the rules!
+				if (checkWithRules(dirs.get(0).name(), rules)) {
+					sendOutput(dirs.get(0).getPath()+"\n");
+				}
+			}
+			for (File f : dirs.get(0).files) {
+				//Print the file if it is valid, and type is a/f
+				if (type != 'd') {
+					//check the rules!
+					if (checkWithRules(f.getName(),rules)) {
+						sendOutput(dirs.get(0).getPath() + f.getName() +"\n");
+					}
+				}
+			}
+			dirs.remove(0);
+		}
+		
+		return null; // Exit successfully
+	}
+	// iname (str), name (str), ! (yes!no), not, -o
+	public boolean checkWithRules(String inputname, ArrayList<String> rules) {
+		//ORder of operations, -o, !, not, name, iname
+		boolean[] results = new boolean[rules.size()]; // tracks the result of the rule in this slot
+		boolean[] checked = new boolean[rules.size()]; // Tracks if we have checked this rule yet
+		for (int i = 0; i < results.length; i++) results[i] = true; // Set them all to true
+		for (int i = 0; i < checked.length; i++) checked[i] = false; // Set them all to true
+		
+		int tooManyCheck = 10000;
+		while (tooManyCheck-- > 0) {
+			//Check if we have checked all the rules
+			boolean checkedAll = true;
+			for (int i = 0; i < checked.length; i++) if (checked[i] == false) checkedAll = false;
+			if (checkedAll) break;
+			
+			//Find the next rule in the order of operations: -name -iname -not ! -o
+			for (int i = 0; i < rules.size(); i++) {
+				if (compareWithWildcards(rules.get(i),"-name*") == false) continue;
+				if (checked[i]) continue; // dont check this rule again if we have checked it
+				String name = rules.get(i).substring("-name".length()); // get just the name
+				results[i] = compareWithWildcards(inputname, name);
+				checked[i] = true; // we have checked this rule!
+			}
+			for (int i = 0; i < rules.size(); i++) {
+				if (compareWithWildcards(rules.get(i),"-iname*") == false) continue;
+				if (checked[i]) continue; // dont check this rule again if we have checked it
+				String name = rules.get(i).substring("-iname".length()); // get just the name
+				results[i] = compareWithWildcards(inputname.toLowerCase(), name.toLowerCase());
+				checked[i] = true; // we have checked this rule!
+			}
+			for (int i = 0; i < rules.size(); i++) {
+				if (compareWithWildcards(rules.get(i),"!")  == false && compareWithWildcards(rules.get(i),"-not") == false) continue;
+				if (checked[i]) continue; // dont check this rule again if we have checked it
+				
+				if (i+1 >= rules.size()) return false;  //We need there to be a  next rule
+				if (results[i+1] == false) { // We want the next one to be false, so if the next one is false we override it to true
+					results[i+1] = true;
+				}
+				else {
+					results[i+1] = false;
+				}
+				results[i] = true;
+				checked[i] = true; // we have checked this rule!
+			}
+			for (int i = 0; i < rules.size(); i++) {
+				if (compareWithWildcards(rules.get(i), "-o") == false) continue;
+				if (checked[i]) continue; // dont check this rule again if we have checked it
+				
+				if (i+1 >= rules.size() || i-1 < 0) return false;  //we need there to be rules on either side of this one
+				if (results[i-1] == true || results[i+1] == true) { // if one of our sides is true, both are 
+					results[i-1] = true;
+					results[i]   = true;
+					results[i+1] = true;
+				}
+				checked[i] = true; // we have checked this rule!
+			}
+		}
+		if (tooManyCheck < 0) System.out.println("EMERGENCY STOPPED THE FIND.");
+		
+		//Compile if there was a rule that did not follow
+		boolean totalresult = true;
+		for (int i = 0; i < results.length; i++) if (results[i] == false) totalresult = false; // Set the result to false if one of these ends up false
+		return totalresult;
+	}
+	//END METHOD
+	
+	
+	
 	
 	//-----------------------------------------------------------
 		// Command: Clear

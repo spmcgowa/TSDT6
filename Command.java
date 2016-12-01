@@ -19,7 +19,7 @@ public class Command {
 			//Might want to switch to doing split on ; and && to break everything up first?
 	public static ArrayList<Command> GenerateCommands(String input) {
 		Scanner read = new Scanner(input);
-		String[] validCommands = new String[] {"mv","ls","exit","clear","cd","cat","pwd","cp","chmod","ssh","nano","scp","head","tail","mkdir","chmod","ssh"};
+		String[] validCommands = new String[] {"zip","unzip","tar","rm","find","mv","ls","exit","clear","cd","cat","pwd","cp","chmod","ssh","nano","scp","head","tail","mkdir"};
 		
 		ArrayList<Command> commands = new ArrayList<Command>();
 		Command newComm = null;
@@ -56,10 +56,20 @@ public class Command {
 						token = token.substring(0, token.length()-1);
 						endIt = true;						
 					}
-					if (token.charAt(0) == '-' && token.length() > 1) {
-						//This is a flag
-						//[TODO] Check to see if something is after the dash, no spaces.
-						newComm.addFlag(token);
+					if ((token.charAt(0) == '-' && token.length() > 1)) {
+						if (token.equals("-maxdepth") || token.equals("-name") || token.equals("-iname") || token.equals("-type")) {
+							// We need to read the next token and add it to this flag?
+							if (read.hasNext()) {
+								String token2 = read.next();
+								newComm.addFlag(token+token2);
+							} else {
+								newComm.error = new TerminalError("Not enough arguments for " + token +"\n");
+								break;
+							}
+						}
+						else {
+							newComm.addFlag(token);
+						}
 					}
 					else {
 						//this is some other form of input. ?
