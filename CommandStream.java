@@ -117,8 +117,10 @@ public class CommandStream implements ActionListener {
 				error = tar(command);
 			} else if (command.getCommand().equals("zip")) {
 				error = zip(command);
-			} else if (command.getCommand().equals("tar")) {
+			} else if (command.getCommand().equals("unzip")) {
 				error = unzip(command);
+			} else {
+				error = new TerminalError("Command was read as valid, but the CommandStream did not recognize it.");
 			}
 			
 			//Handle Errors!
@@ -255,22 +257,23 @@ public class CommandStream implements ActionListener {
 		if (a.lastFoundDir.equals(b.lastFoundDir)) {
 			//They share the exact same result directory.
 			if (a.endsWithFile != b.endsWithFile) {
-				return true;
+				return false;
 			}
 			else if (a.endsWithFile) {
 				// the case that both are files
 				File f1 = findFile(a.lastToken,a.lastFoundDir);
 				File f2 = findFile(b.lastToken,b.lastFoundDir);
 				if (f1.equals(f2)) {
-					return false;
+					return true;
 				}
 			}
 			else {
 				//the case that both are directories, we already checked if they are equal to get this far
-				return false;
+				return true;
 			}
 		}
-		return true;
+		
+		return false;
 	}
 	
 	public void sendOutput(String out) {
@@ -310,12 +313,12 @@ public class CommandStream implements ActionListener {
 			ret += s;
 			ret += " ";
 		}
-		
+		System.out.println("Converted zip command to: " + ret);
 		return tar(Command.GenerateCommands(ret).get(0));
 	}
 	
 	public TerminalError unzip(Command command) {
-		if (command.getInputs().size() < 2) {
+		if (command.getInputs().size() < 1) {
 			return new TerminalError("Not enough arguments.\n");
 		}
 		String ret = "tar -xf ";
@@ -323,7 +326,7 @@ public class CommandStream implements ActionListener {
 			ret += s;
 			ret += " ";
 		}
-		
+		System.out.println("Converted unzip command to: " + ret);
 		return tar(Command.GenerateCommands(ret).get(0));
 	}
 	
@@ -347,7 +350,7 @@ public class CommandStream implements ActionListener {
 		String flags = "";
 		//Cram all of these flags together
 		for (int i = 0; i < command.getFlags().size(); i++) {
-			flags += command.getFlags().get(1);
+			flags += command.getFlags().get(i);
 		}
 		/*
 		-c Create a tar // Exclusive with x
@@ -386,8 +389,6 @@ public class CommandStream implements ActionListener {
 				bools[3] = true;
 			}
 			else if (flags.charAt(i) == 'v') {
-				if (bools[0] == true || bools[3] == true || bools[1] == true)
-					return new TerminalError("You can only have one type of modification flag {c,x,t,v}.\n");
 				bools[4] = true;
 			}
 			else if (flags.charAt(i) == 'z') {
@@ -404,16 +405,19 @@ public class CommandStream implements ActionListener {
 			
 		}
 		//compile how much information are we supposed to output, this will either be 0 for non, 1 for basic, 2 for verbose
-		int outputLevel = 0 + ( (bools[3]) ? 1 : 0) + (( (bools[4]) ? 2 : 0));
-		
+		int outputLevel = 0 + ( (bools[3] || bools[2]) ? 1 : 0) + (( (bools[4]) ? 2 : 0));
+		System.out.println("Decided to output at level " + outputLevel);
 		//Now do the right thing
 		if (bools[0] == true) {
+			System.out.println("Bundling");
 			bundleTar(command, outputLevel);
 		}
 		else if (bools[1] == true)  {
+			System.out.println("Unbundling");
 			unbundleTar(command, outputLevel);
 		}
-		else if (bools[2] == true) {
+		else if (bools[3] == true) {
+			System.out.println("Displaying");
 			//Print a tarball's contents, check t of v for level of output
 			String path = command.getInputs().get(0);
 			SearchResults results = validateFilePath(path);
@@ -427,27 +431,28 @@ public class CommandStream implements ActionListener {
 				return new TerminalError("Not a tar/zip file.\n");
 			outputBundle(((TarBall) file).getItems(), outputLevel);
 		}
-
+		else {
+			return  new TerminalError("Invalid flags.");
+		}
+		
 		return null;
 	}
 	
 	private void outputBundle(ArrayList<Object> items, int outputLevel) {
 		if (outputLevel == 0) return;
-		
-		for (int i = 0; i < items.size(); i++) {
-			if (outputLevel == 1) {
-				for (Object o : items) {
-					if (o instanceof File) {
-						sendOutput( ((File)o).getName() + "\n");
-					}
-					else {
-						sendOutput( ((Directory)o).name() + "\n");
-					}
+		System.out.println("Attemtping to output bundle, item count " + items.size());
+		if (outputLevel == 1) {
+			for (Object o : items) {
+				if (o instanceof File) {
+					sendOutput( ((File)o).getName() + "\n");
+				}
+				else {
+					sendOutput( ((Directory)o).name() + "\n");
 				}
 			}
-			else if (outputLevel == 2) {
-				//[TODO] do something here?
-			}
+		}
+		else if (outputLevel > 1) {
+			//[TODO] do something here?
 		}
 	}
 	
@@ -468,6 +473,7 @@ public class CommandStream implements ActionListener {
 		TarBall bundle = (TarBall) file;
 		outputBundle(bundle.getItems(),outputLevel);
 		//Unpack everything
+		System.out.println("Items to unbundle: " + bundle.getItems().size());
 		for (int i = 0; i < bundle.getItems().size(); i++) {
 			if (bundle.getItems().get(i) instanceof File) {
 				File f = (File)bundle.getItems().get(i);
@@ -495,7 +501,7 @@ public class CommandStream implements ActionListener {
 		ArrayList<String> prepInputs = command.getInputs();
 		prepInputs.remove(0); //remove the output path that is included in the command inputs
 		
-		for (int i = prepInputs.size(); i >= 0 ; i--) {
+		for (int i = prepInputs.size() - 1; i >= 0 ; i--) {
 			//Get the path for the item
 			String itemPath = command.getInputs().get(i);
 			SearchResults itemSearch = validateFilePath(itemPath);
@@ -503,7 +509,7 @@ public class CommandStream implements ActionListener {
 				return new TerminalError("Invalid file path.");
 			//First check for duplicates
 			//Loop through all other inputs, check if they match the current one and remove it if they do 
-			for (int j = prepInputs.size(); j >= 0 ; j--) {
+			for (int j = prepInputs.size() - 1; j >= 0 ; j--) {
 				if (i==j) continue; // Dont delete the original thing we were checking
 				
 				//Prep the second items information
@@ -514,6 +520,7 @@ public class CommandStream implements ActionListener {
 				
 				//Compare them
 				if (compareSearchResults(itemSearch,itemSearch2) == true) {
+					System.out.println("Pruned " + prepInputs.get(j) + " from the inputs.");
 					prepInputs.remove(j);
 				}
 				
@@ -525,7 +532,7 @@ public class CommandStream implements ActionListener {
 			// at a higher point in the hierarchy so we want to remove it from the inputs to avoid errors.
 			if (itemSearch.endsWithFile == false) { //do not need to check files
 				String truePath1 = itemSearch.lastFoundDir.getPath();
-				for (int j = prepInputs.size(); j >= 0 ; j--) {
+				for (int j = prepInputs.size() - 1; j >= 0 ; j--) {
 					if (i==j) continue; // Dont delete the original thing we were checking
 					//Prep the second items information
 					String itemPath2 = command.getInputs().get(j);
@@ -542,12 +549,12 @@ public class CommandStream implements ActionListener {
 				}	
 			}
 		}
+		System.out.println("Final file count: " + prepInputs.size());
 		//the inputs should now be properly prepped to avoid issues. 
 		
 		//This array list will hold all the items we are putting into the bundle
 		ArrayList<Object> items = new ArrayList<Object>();
-		outputBundle(items, outputLevel);
-		for (int i = 1; i < prepInputs.size(); i++) {
+		for (int i = 0; i < prepInputs.size(); i++) {
 			//Get the path for the item
 			String itemPath = command.getInputs().get(i);
 			SearchResults itemSearch = validateFilePath(itemPath);
@@ -564,8 +571,12 @@ public class CommandStream implements ActionListener {
 			}
 		}
 		
+		
+		System.out.println("Items to bundle: " + items.size());
 		TarBall bundle = new TarBall(outputSearch.lastToken,items);
 		outputSearch.lastFoundDir.addFile(bundle);
+		
+		outputBundle(items, outputLevel);
 		return null;
 	}
 	
