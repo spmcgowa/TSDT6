@@ -8,6 +8,7 @@ public class CommandStream implements ActionListener {
 
 	JTextField input;
 	JTextArea output;
+	JTextPane storyText;
 	Scanner scan;
 	Directory currentDirectory;
 	JPanel buttons;
@@ -27,6 +28,7 @@ public class CommandStream implements ActionListener {
 
 	public CommandStream(JTextField input, JTextArea output, Directory cd,
 			Directory root, JPanel buttons, String lv1, JTextPane graphicsTextOutput, JLabel graphics, int x, int y) {
+		this.storyText = graphicsTextOutput;
 		this.input = input;
 		this.output = output;
 		setCurrentDirectory(cd);
@@ -147,7 +149,7 @@ public class CommandStream implements ActionListener {
 			if(commands != null) {
 				if(currentLevel == 1) {
 					if(lv.playLevel1(command)) {
-						lv2 = new Level2();
+						lv2 = new Level2(storyText);
 						currentLevel = 2;
 					}
 				} else if(currentLevel == 2) {
@@ -162,7 +164,7 @@ public class CommandStream implements ActionListener {
 		if(text.equals("")) {
 			if(currentLevel == 1) {
 				if(lv.playLevel1(new Command())) {
-					lv2 = new Level2();
+					lv2 = new Level2(storyText);
 					currentLevel = 2;
 				}
 			}
