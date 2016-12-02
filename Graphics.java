@@ -2,29 +2,32 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 import javax.swing.*;
-import java.util.HashMap;
+//import java.util.HashMap;
 
 public class Graphics {
 	
 	JLabel graphics;
 	int x;
 	int y;
-	HashMap<Directory, ImageIcon> map;
+	//HashMap<Directory, ImageIcon> map;
 	ImageIcon img;
+	int level;
 	//ImageIcon ...
 	
-	public Graphics(JLabel graphics, int x, int y) {
+	public Graphics(JLabel graphics, int x, int y, int lv) {
 		this.graphics = graphics;
 		this.x = x;
-		this.y = (int)((y/2)*0.8);
-		map = new HashMap<Directory, ImageIcon>();
+		this.y = (int)((y/2)*1.1);
+		//map = new HashMap<Directory, ImageIcon>();
+		this.level = lv;
 	}
 	
-	public void updateGraphics(Command cmd, Directory d) throws Exception {
-		img = new ImageIcon(d.name() + ".jpg");
+	public void updateGraphics(Command cmd, Directory d) {
+		img = new ImageIcon("resources/level" + level + "/" + d.name() + ".png");
 		
 		if(img == null) {
-			throw new Exception("Image not found!");
+			System.out.println("Image not found!");
+			return;
 		}
 
 		img = verifyScale(img);
@@ -44,6 +47,10 @@ public class Graphics {
 		
 		bar.dispose();
 		return scaled;
+	}
+	
+	public void updateLevel(int l) {
+		level = l;
 	}
 
 }

@@ -41,7 +41,11 @@ public class CommandStream implements ActionListener {
 		lv.setLocation(currentDirectory);
 		lv.playLevel1(new Command());
 		currentLevel = 1;
-		g = new Graphics(graphics, x, y);
+		g = new Graphics(graphics, x, y, currentLevel);
+		
+		graphics.setIcon(new ImageIcon("/resources/level1/Library.png"));
+		
+		g.updateGraphics(new Command(), currentDirectory);
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -68,10 +72,12 @@ public class CommandStream implements ActionListener {
 		//Dev Mode
 				
 		Scanner temp = new Scanner(text);
-		
 		if(temp.hasNext()) {
-			if(temp.next().equals("setstage")) {
+			String s = temp.next();
+			if(s.equals("setstage")) {
 				lv.devMode(Integer.parseInt(temp.next()));
+			} else if(s.equals("setlevel")) {
+				setlevel(Integer.parseInt(temp.next()));
 			}
 		}		
 		temp.close();
@@ -139,12 +145,8 @@ public class CommandStream implements ActionListener {
 				sendOutput(error.getString());
 			}
 			
-			try {
-				g.updateGraphics(command, currentDirectory);
-			} catch (Exception e1) {
-				e1.printStackTrace();
-				System.exit(1);
-			}
+			g.updateGraphics(command, currentDirectory);
+			
 			
 			if(commands != null) {
 				if(currentLevel == 1) {
@@ -1513,5 +1515,9 @@ public class CommandStream implements ActionListener {
 
 		// End block of Command Methods
 		// ----------------------------------------------------------------------------------------------------------------------------------------------------
+		
+		protected void setlevel (int x) {
+			this.currentLevel = x;
+		}
 		
 }

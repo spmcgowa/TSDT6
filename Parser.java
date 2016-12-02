@@ -86,6 +86,7 @@ public class Parser {
 			output.setPreferredSize(new Dimension(x, (int)(y*0.95)));
 			output.setEditable(false);
 			output.setFont(new Font("Courier", Font.PLAIN, 14));
+			output.setLineWrap(true);
 			
 			input.setBackground(Color.BLACK);
 			input.setForeground(Color.WHITE);

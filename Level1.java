@@ -56,10 +56,10 @@ public class Level1 {
 			}
 		} else if(command.equals("cd")) {
 			if(stepCount == 5) {
-				output.setText("Now that you have yourself in another directory, an easy way to navigate to the parent directory is to use <b>cd ..</b> Use it twice now to get into the library’s parent directory, the city.");
+				output.setText("Now that you have yourself in another directory, an easy way to navigate to the parent directory is to use <b>cd ..</b> Use it twice now to get into the library's parent directory, the city.");
 				stepCount++;
 			} else if (stepCount == 6 && location.name().equals("City")) {
-				output.setText("The map says that the undiscovered pyramid is in Giza. That’s way too far for a penguin to fly! I’ll have to get to the <b>Airport</b>! Use <b>ls</b> and <b>cd</b> to get there.");
+				output.setText("The map says that the undiscovered pyramid is in Giza. That's way too far for a penguin to fly! I'll have to get to the <b>Airport</b>! Use <b>ls</b> and <b>cd</b> to get there.");
 				stepCount++;
 			} else if (stepCount == 7 && location.name().equals("Airport")) {
 				output.setText("Welcome to the airport! The baggage check is here, please move your check bag before boarding your plane. [Enter]");
@@ -91,7 +91,7 @@ public class Level1 {
 				output.setText("Congratulations! You have completed Level 1. Hit [Enter] to start Level 2.");
 				stepCount++;
 			} else if (stepCount == 27 && location.name().equals("TreasureRoom")) {
-				output.setText("Inside the Treasure room, there are many artifacts from ancient Egypt. One amulet, however stands out from the rest. The amulet is in the shape of a frog, a traditional of Heket. There is more to the amulet than what it appears; perhaps there is something in the library about it. [Enter]");
+				output.setText("Inside the Treasure room, there are many artifacts from ancient Egypt. One amulet, however stands out from the rest. The amulet is in the shape of a frog, a traditional symbol of Heket. There is more to the amulet than what it appears; perhaps there is something in the library about it. [Enter]");
 				stepCount++;
 			}
 		} else if(command.equals("ls")) {
@@ -99,7 +99,7 @@ public class Level1 {
 				output.setText("In Linux, the <b>ls</b> command lists files and directories in the current working directory. A directory is a folder that can hold files and/or other directories. Try the <b>pwd</b> command now.");
 				stepCount++;
 			} else if (stepCount == 14 && location.name().equals("Giza")) {
-				output.setText("Hmm. Nothing new showed up, but looking at the map in the sun, it looks like there’s some sort of invisible ink… [Enter]");
+				output.setText("Hmm. Nothing new showed up, but looking at the map in the sun, it looks like there's some sort of invisible ink... [Enter]");
 				stepCount++;
 			} else if (stepCount == 16 && location.name().equals("Giza")) {
 				output.setText("Most pyramids are burial chambers for pharaohs, but Heket was the Goddess of Frogs. This definitely seems worth further exploration");
@@ -108,12 +108,12 @@ public class Level1 {
 				output.setText("Remember that you are able to traverse a directory system using the <b>cd</b> command. Try navigating to the GrandGallery or the HypostyleHall now.");
 				stepCount++;
 			} else if (stepCount == 22 && location.name().equals("GrandGallery") && cmd.getFlags().size() > 0) {
-				output.setText("There was a statue hidden in this room! But it looks stuck to the floor. I’ll have to make a cast of it so I can copy it. [Enter]");
+				output.setText("There was a statue hidden in this room! But it looks stuck to the floor. I'll have to make a cast of it so I can copy it. [Enter]");
 				stepCount++;
 			}
 		} else if(command.equals("mv")) {
 			if (stepCount == 9 && location.name().equals("Airport") && baggage.getFiles().contains(lugg)) {
-				output.setText("Woah there! You shouldn’t go through security with your terminal all cluttered! Use the <b>clear</b> command to clean that right up!");
+				output.setText("Woah there! You shouldn't go through security with your terminal all cluttered! Use the <b>clear</b> command to clean that right up!");
 				stepCount++;
 			} else if (stepCount == 19 && location.name().equals(".PyramidOfHeket") && slab.getName().equals("door.txt")) {
 				output.setText("That did the trick! Now let's check the map to see the pyramid's rooms.");
@@ -133,10 +133,10 @@ public class Level1 {
 				output.setText("The command line (located below) takes in commands and runs them. One of the most useful commands is the <b>ls</b> command. Use <b>ls</b> now to open map");
 				stepCount++;
 			} else if(stepCount == 4 && location.name().equals("Library")) {
-				output.setText("Another useful command is <b>cd</b>. Using it, the user can change their working directory. The syntax, or structure, of <b>cd</b> is <b>cd <directoryName></b>. Try navigating into one of the directories located in the library. NOTE: The <b>cd</b> command does not inherently know where every directory is in the computer. When inputting the directory name, the user might have to include that directory’s path.");
+				output.setText("Another useful command is <b>cd</b>. Using it, the user can change their working directory. The syntax, or structure, of <b>cd</b> is <b>cd <directoryName></b>. Try navigating into one of the directories located in the library. NOTE: The <b>cd</b> command does not inherently know where every directory is in the computer. When inputting the directory name, the user might have to include that directory's path.");
 				stepCount++;
 			} else if (stepCount == 8 && location.name().equals("Airport")) {
-				output.setText("The <b>mv</b> command moves items in Linux directories. <b>mv</b>’s format is: ‘<b>mv [file name] [destination directory]</b>'. Move your luggage to the BaggageClaim.");
+				output.setText("The <b>mv</b> command moves items in Linux directories. <b>mv</b>'s format is: \'<b>mv [file name] [destination directory]</b>\'. Move your luggage to the BaggageClaim.");
 				stepCount++;
 			} else if (stepCount == 12 && location.name().equals("Egypt")) {
 				output.setText("Now to Giza!");
