@@ -37,6 +37,10 @@ public class Level1 {
 		output.setPreferredSize(new Dimension(200, 200));
 	}
 
+	public int getStep() {
+    return stepCount;
+  }
+
 	public boolean playLevel1(Command cmd) {
 		String command = cmd.getCommand();
 		if(stepCount == 26 && (location.name().equals("GrandGallery") || location.name().equals("HypostyleHall"))) {
@@ -47,8 +51,9 @@ public class Level1 {
 			}
 		}
 		if(stepCount == 0) {
-			output.setText("While researching frogs in the Library, Dr. [player name] comes across directions to a previously undiscovered pyramid. The directions make mention of a previously undiscovered treasure that definitely belongs in a museum. Excited by this new information, Dr. [player name] is ready to set off on an adventure! [Enter]");
-			stepCount++;
+			output.setText("While researching frogs in the Library, Dr. Jones comes across directions to a previously undiscovered pyramid. The directions make mention of a previously undiscovered treasure that definitely belongs in a museum. Excited by this new information, Dr. [player name] is ready to set off on an adventure! [Enter]");
+			//stepCount++;
+			return true;
 		} else if(command.equals("pwd")) {
 			 if (stepCount == 3 && location.name().equals("Library")) {
 					output.setText("<b>pwd</b> works like a compass to help us get our bearings in the system. Each slash represents a directory, since the /library directory is to the right of the /city directory it means that the library is contained within the city. This is the basis for the path system. [Enter]");
