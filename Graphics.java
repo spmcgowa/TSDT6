@@ -22,7 +22,7 @@ public class Graphics {
 		this.level = lv;
 	}
 	
-	public void updateGraphics(Command cmd, Directory d) {
+	public void updateGraphics(Command cmd, Directory d, int step) {
 		img = new ImageIcon("resources/level" + level + "/" + d.name() + ".png");
 		
 		if(img == null) {

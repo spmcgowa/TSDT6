@@ -1,4 +1,4 @@
 
-public class Level5 {
+public class Level5 extends Level {
 
 }

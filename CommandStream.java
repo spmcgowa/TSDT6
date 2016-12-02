@@ -15,7 +15,7 @@ public class CommandStream implements ActionListener {
 	File nanoFile;
 	Directory prevDir;
 	final Directory root;
-	Level1 lv;
+	Level lv;
 	Level2 lv2;
 	Level3 lv3;
 	Level4 lv4;
@@ -39,13 +39,13 @@ public class CommandStream implements ActionListener {
 		lv = new Level1(graphicsTextOutput);
 		currentDirectory = lv.buildLevel(root);
 		lv.setLocation(currentDirectory);
-		lv.playLevel1(new Command());
+		lv.playLevel(new Command());
 		currentLevel = 1;
 		g = new Graphics(graphics, x, y, currentLevel);
 		
 		graphics.setIcon(new ImageIcon("/resources/level1/Library.png"));
 		
-		g.updateGraphics(new Command(), currentDirectory);
+		g.updateGraphics(new Command(), currentDirectory, lv.getStep());
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -85,6 +85,7 @@ public class CommandStream implements ActionListener {
 		//-----------------------------------------------------------------
 				
 		
+		if(!text.isEmpty()) {
 		// this retrieves the text from the input field
 		ArrayList<Command> commands = Command.GenerateCommands(text);
 		TerminalError error = null;
@@ -145,32 +146,42 @@ public class CommandStream implements ActionListener {
 				sendOutput(error.getString());
 			}
 			
-			g.updateGraphics(command, currentDirectory);
+			g.updateGraphics(command, currentDirectory, lv.getStep());
 			
-			
-			if(commands != null) {
+			if(lv.playLevel(command)) {
 				if(currentLevel == 1) {
-					if(lv.playLevel1(command)) {
-						lv2 = new Level2(storyText);
-						currentLevel = 2;
-					}
+					lv = new Level2(storyText);
+					currentLevel = 2;
 				} else if(currentLevel == 2) {
-					//if(lv2.playLevel2(command)) {
-						//lv3 = new Level3();
-						//currentLevel = 3;
-					//}
+					lv = new Level3();
+					currentLevel = 3;
+				} else if(currentLevel == 3) {
+					lv = new Level4(storyText);
+				} else if(currentLevel == 5) {
+					lv = new Level5();
 				}
 			}
+			
 		} //End for loop!
-		
-		if(text.equals("")) {
-			if(currentLevel == 1) {
-				if(lv.playLevel1(new Command())) {
-					lv2 = new Level2(storyText);
+		} else {
+			g.updateGraphics(new Command(), currentDirectory, lv.getStep());
+			
+			
+			if(lv.playLevel(new Command())) {
+				if(currentLevel == 1) {
+					lv = new Level2(storyText);
 					currentLevel = 2;
+				} else if(currentLevel == 2) {
+					lv = new Level3();
+					currentLevel = 3;
+				} else if(currentLevel == 3) {
+					lv = new Level4(storyText);
+				} else if(currentLevel == 5) {
+					lv = new Level5();
 				}
 			}
 		}
+		
 		input.setText("");
 	}
 

@@ -3,7 +3,7 @@ import java.util.ArrayList;
 import javax.swing.*;
 
 
-public class Level4 {
+public class Level4 extends Level {
 
 	JTextPane output;
 	int stepCount;
@@ -18,7 +18,7 @@ public class Level4 {
 		caught = false;
 	}
 	
-	public boolean playLevel4(Command cmd) {
+	public boolean playLevel(Command cmd) {
 		String command = cmd.getCommand();
 		place = location.name();
 		/* Checking for empty command to advance dialogue */

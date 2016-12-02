@@ -3,7 +3,7 @@ import java.util.ArrayList;
 
 import javax.swing.*;
 
-public class Level2 {
+public class Level2 extends Level {
 
   CommandStream cs;
   String dialogStep;

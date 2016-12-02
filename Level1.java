@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import javax.swing.*;
 
 
-public class Level1 {
+public class Level1 extends Level {
 
 	CommandStream cs;
 	String dialogStep;
@@ -37,7 +37,7 @@ public class Level1 {
 		output.setPreferredSize(new Dimension(200, 200));
 	}
 
-	public boolean playLevel1(Command cmd) {
+	public boolean playLevel(Command cmd) {
 		String command = cmd.getCommand();
 		if(stepCount == 26 && (location.name().equals("GrandGallery") || location.name().equals("HypostyleHall"))) {
 			if(checkWinCons()) {
@@ -341,4 +341,5 @@ public class Level1 {
 		}
 		return false;
 	}
+	
 }
