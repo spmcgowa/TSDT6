@@ -56,7 +56,7 @@ public class Level1 {
 			}
 		} else if(command.equals("cd")) {
 			if(stepCount == 5) {
-				output.setText("Now that you have yourself in another directory, an easy way to navigate to the parent directory is to use ‘<b>cd ..</b>’ Use it twice now to get into the library’s parent directory, the city.");
+				output.setText("Now that you have yourself in another directory, an easy way to navigate to the parent directory is to use <b>cd ..</b> Use it twice now to get into the library’s parent directory, the city.");
 				stepCount++;
 			} else if (stepCount == 6 && location.name().equals("City")) {
 				output.setText("The map says that the undiscovered pyramid is in Giza. That’s way too far for a penguin to fly! I’ll have to get to the <b>Airport</b>! Use <b>ls</b> and <b>cd</b> to get there.");
@@ -88,8 +88,8 @@ public class Level1 {
 				output.setText("To move a file: <b>mv [filename] [destination directory]</b> | To rename a file or directory: <b>mv [old name] [new name]</b> | Go to a specific directory: <b>cd [directory name]</b> | Go to the parent directory: <b>cd ..</b> | Go to the previous working directory: <b>cd -</b> | View directory contents: <b>ls</b> | View all directory contents: <b>ls -a</b>");
 				stepCount++;
 			} else if (stepCount == 29 && location.name().equals("Library")) {
-				output.setText("");
-				return true;
+				output.setText("Congratulations! You have completed Level 1. Hit [Enter] to start Level 2.");
+				stepCount++;
 			} else if (stepCount == 27 && location.name().equals("TreasureRoom")) {
 				output.setText("Inside the Treasure room, there are many artifacts from ancient Egypt. One amulet, however stands out from the rest. The amulet is in the shape of a frog, a traditional of Heket. There is more to the amulet than what it appears; perhaps there is something in the library about it. [Enter]");
 				stepCount++;
@@ -133,7 +133,7 @@ public class Level1 {
 				output.setText("The command line (located below) takes in commands and runs them. One of the most useful commands is the <b>ls</b> command. Use <b>ls</b> now to open map");
 				stepCount++;
 			} else if(stepCount == 4 && location.name().equals("Library")) {
-				output.setText("Another useful command is <b>cd</b>. Using it, the user can change their working directory. The syntax, or structure, of <b>cd</b> is ‘<b>cd <directoryName></b>’. Try navigating into one of the directories located in the library. NOTE: The <b>cd</b> command does not inherently know where every directory is in the computer. When inputting the directory name, the user might have to include that directory’s path.");
+				output.setText("Another useful command is <b>cd</b>. Using it, the user can change their working directory. The syntax, or structure, of <b>cd</b> is <b>cd <directoryName></b>. Try navigating into one of the directories located in the library. NOTE: The <b>cd</b> command does not inherently know where every directory is in the computer. When inputting the directory name, the user might have to include that directory’s path.");
 				stepCount++;
 			} else if (stepCount == 8 && location.name().equals("Airport")) {
 				output.setText("The <b>mv</b> command moves items in Linux directories. <b>mv</b>’s format is: ‘<b>mv [file name] [destination directory]</b>'. Move your luggage to the BaggageClaim.");
@@ -142,7 +142,7 @@ public class Level1 {
 				output.setText("Now to Giza!");
 				stepCount++;
 			} else if (stepCount == 15 && location.name().equals("Giza")) {
-				output.setText("In Linux, files that begin with a dot ‘.’ do not show up with a normal <b>ls</b> command. Most commands in linux allow arguments to add extra functionalities to the base command. Arguments are added after the base command. An example is <b>ls</b>, adding <b>-a</b> after ls will cause the command to print ‘.’ files in addition to normal ones. Go, ahead try using <b>ls -a</b>.");
+				output.setText("In Linux, files that begin with a dot <b>.</b> do not show up with a normal <b>ls</b> command. Most commands in linux allow arguments to add extra functionalities to the base command. Arguments are added after the base command. An example is <b>ls</b>, adding <b>-a</b> after ls will cause the command to print <b>.</b> files in addition to normal ones. Go, ahead try using <b>ls -a</b>.");
 				stepCount++;
 			} else if (stepCount == 18 && location.name().equals(".PyramidOfHeket")) {
 				output.setText("In Linux, in addition to moving files, the <b>mv</b> command can rename files. The format for this is <b>mv [original filename] [new filename]</b>. Try turning the slab into a door.");
@@ -153,6 +153,8 @@ public class Level1 {
 			} else if (stepCount == 28 && location.name().equals("TreasureRoom")) {
 				output.setText("To quickly return to the home directory in Linux, you can <b>cd /home</b>. Use it now to end this adventure.");
 				stepCount++;
+			} else if (stepCount == 30 && location.name().equals("Library")) {
+				return true;
 			}
 		} else if (command.equals("cp")) {
 			if (stepCount == 24 && location.name().equals("GrandGallery")) {
