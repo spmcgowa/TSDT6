@@ -25,6 +25,7 @@ public class CommandStream implements ActionListener {
 	DimensionX dimension = new DimensionX();
 	Graphics g;
 	Directory preservation;
+	Directory levelHome;
 
 	public CommandStream(JTextField input, JTextArea output, Directory cd,
 			Directory root, JPanel buttons, String lv1, JTextPane graphicsTextOutput, JLabel graphics, int x, int y) {
@@ -37,13 +38,12 @@ public class CommandStream implements ActionListener {
 		nanoFile = null;
 		prevDir = null;
 		lv = new Level1(graphicsTextOutput);
-		currentDirectory = lv.buildLevel(root);
+		levelHome = lv.buildLevel(root);
+		currentDirectory = levelHome;
 		lv.setLocation(currentDirectory);
 		lv.playLevel(new Command());
 		currentLevel = 1;
 		g = new Graphics(graphics, x, y, currentLevel);
-		
-		graphics.setIcon(new ImageIcon("/resources/level1/Library.png"));
 		
 		g.updateGraphics(new Command(), currentDirectory, lv.getStep());
 	}
@@ -76,8 +76,11 @@ public class CommandStream implements ActionListener {
 			String s = temp.next();
 			if(s.equals("setstage")) {
 				lv.devMode(Integer.parseInt(temp.next()));
+				lv.playLevel(new Command());
 			} else if(s.equals("setlevel")) {
 				setlevel(Integer.parseInt(temp.next()));
+			} else if(s.equals("printstate")) {
+				sendOutput("Current level :" + currentLevel + "\nCurrent stage :" + lv.getStep() + "\nCurrent directory: " + currentDirectory.name() + "\n");
 			}
 		}		
 		temp.close();
@@ -144,14 +147,19 @@ public class CommandStream implements ActionListener {
 			if(error != null) {
 				//Output Error!
 				sendOutput(error.getString());
+				return;
 			}
 			
-			g.updateGraphics(command, currentDirectory, lv.getStep());
 			
 			if(lv.playLevel(command)) {
 				if(currentLevel == 1) {
 					lv = new Level2(storyText);
 					currentLevel = 2;
+					g.updateLevel(2);
+					levelHome = lv.buildLevel(root);
+					currentDirectory = levelHome;
+					lv.setLocation(currentDirectory);
+					lv.playLevel(new Command());
 				} else if(currentLevel == 2) {
 					lv = new Level3();
 					currentLevel = 3;
@@ -162,15 +170,22 @@ public class CommandStream implements ActionListener {
 				}
 			}
 			
+			g.updateGraphics(command, currentDirectory, lv.getStep());
+			
 		} //End for loop!
 		} else {
-			g.updateGraphics(new Command(), currentDirectory, lv.getStep());
 			
 			
 			if(lv.playLevel(new Command())) {
 				if(currentLevel == 1) {
 					lv = new Level2(storyText);
 					currentLevel = 2;
+					g.updateLevel(2);
+					levelHome = lv.buildLevel(root);
+					currentDirectory = levelHome;
+					lv.setLocation(currentDirectory);
+					lv.devMode(0);
+					lv.playLevel(new Command());
 				} else if(currentLevel == 2) {
 					lv = new Level3();
 					currentLevel = 3;
@@ -180,6 +195,8 @@ public class CommandStream implements ActionListener {
 					lv = new Level5();
 				}
 			}
+			
+			g.updateGraphics(new Command(), currentDirectory, lv.getStep());
 		}
 		
 		input.setText("");
@@ -1104,6 +1121,11 @@ public class CommandStream implements ActionListener {
 				return new TerminalError("Not enough Arguments.\n");
 			}
 			String path = command.getInputs().get(0);
+			
+			if(path.charAt(0) == '/') {
+				currentDirectory = levelHome;
+			}
+			
 			SearchResults results = validateFilePath(path);
 			if (results.validPath == true) {
 				if (results.endsWithFile) {
@@ -1528,6 +1550,17 @@ public class CommandStream implements ActionListener {
 		// ----------------------------------------------------------------------------------------------------------------------------------------------------
 		
 		protected void setlevel (int x) {
+			if(x == 1) {
+				lv = new Level1(storyText);
+			} else if(x == 2) {
+				lv = new Level2(storyText);
+			}
+			levelHome = lv.buildLevel(root);
+			currentDirectory = levelHome;
+			g.updateLevel(x);
+			g.updateGraphics(new Command(), currentDirectory, lv.getStep());
+			lv.setLocation(currentDirectory);
+			lv.playLevel(new Command());
 			this.currentLevel = x;
 		}
 		

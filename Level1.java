@@ -55,7 +55,7 @@ public class Level1 extends Level {
 					stepCount++;
 			}
 		} else if(command.equals("cd")) {
-			if(stepCount == 5) {
+			if(stepCount == 5 && location.getParent().name().equals("Library")) {
 				output.setText("Now that you have yourself in another directory, an easy way to navigate to the parent directory is to use <b>cd ..</b> Use it twice now to get into the library's parent directory, the city.");
 				stepCount++;
 			} else if (stepCount == 6 && location.name().equals("City")) {
@@ -91,7 +91,7 @@ public class Level1 extends Level {
 				output.setText("Congratulations! You have completed Level 1. Hit [Enter] to start Level 2.");
 				stepCount++;
 			} else if (stepCount == 27 && location.name().equals("TreasureRoom")) {
-				output.setText("Inside the Treasure room, there are many artifacts from ancient Egypt. One amulet, however stands out from the rest. The amulet is in the shape of a frog, a traditional symbol of Heket. There is more to the amulet than what it appears; perhaps there is something in the library about it. [Enter]");
+				output.setText("Inside the Treasure Room, there are many artifacts from ancient Egypt. One amulet, however stands out from the rest. The amulet is in the shape of a frog, a traditional symbol of Heket. There is more to the amulet than what it appears; perhaps there is something in the library about it. [Enter]");
 				stepCount++;
 			}
 		} else if(command.equals("ls")) {
@@ -133,7 +133,7 @@ public class Level1 extends Level {
 				output.setText("The command line (located below) takes in commands and runs them. One of the most useful commands is the <b>ls</b> command. Use <b>ls</b> now to open map");
 				stepCount++;
 			} else if(stepCount == 4 && location.name().equals("Library")) {
-				output.setText("Another useful command is <b>cd</b>. Using it, the user can change their working directory. The syntax, or structure, of <b>cd</b> is <b>cd <directoryName></b>. Try navigating into one of the directories located in the library. NOTE: The <b>cd</b> command does not inherently know where every directory is in the computer. When inputting the directory name, the user might have to include that directory's path.");
+				output.setText("Another useful command is <b>cd</b>. Using it, the user can change their working directory. The syntax, or structure, of <b>cd</b> is <b>cd [directoryName]</b>. Try navigating into one of the directories located in the library. NOTE: The <b>cd</b> command does not inherently know where every directory is in the computer. When inputting the directory name, the user might have to include that directory's path.");
 				stepCount++;
 			} else if (stepCount == 8 && location.name().equals("Airport")) {
 				output.setText("The <b>mv</b> command moves items in Linux directories. <b>mv</b>'s format is: \'<b>mv [file name] [destination directory]</b>\'. Move your luggage to the BaggageClaim.");
@@ -148,10 +148,10 @@ public class Level1 extends Level {
 				output.setText("In Linux, in addition to moving files, the <b>mv</b> command can rename files. The format for this is <b>mv [original filename] [new filename]</b>. Try turning the slab into a door.");
 				stepCount++;
 			} else if (stepCount == 23 && location.name().equals("GrandGallery")) {
-				output.setText("In Linux, you can make a copy of a file or directory with the <b>cp</b> command. The format is <b>cp [source file] [file path for directory you want it copied to]</b>. Try copying the feline statue now to the HypostyleHall.");
+				output.setText("In Linux, you can make a copy of a file or directory with the <b>cp</b> command. The format is <b>cp [source file] [file path for directory you want it copied to]</b>. Try copying the feline statue now to the HypostyleHall. (Hint: you can use the <b>..</b> argument from <b>cd</b> in file paths as well, for example <b>cp foo.txt ../bar</b> This will copy <b>foo.txt</b> to the bar directory contained in <b>foo.txt</b>'s parent directory.)");
 				stepCount++;
 			} else if (stepCount == 28 && location.name().equals("TreasureRoom")) {
-				output.setText("To quickly return to the home directory in Linux, you can <b>cd /home</b>. Use it now to end this adventure.");
+				output.setText("To quickly return to the home directory in Linux, you can <b>cd /</b>. Use it now to end this adventure.");
 				stepCount++;
 			} else if (stepCount == 30 && location.name().equals("Library")) {
 				return true;
@@ -170,7 +170,7 @@ public class Level1 extends Level {
 	}
 
 	protected void devMode(int n) {
-		stepCount = n;
+		this.stepCount = n;
 	}
 
 	protected Directory buildLevel(Directory root) {
@@ -340,6 +340,10 @@ public class Level1 extends Level {
 			}
 		}
 		return false;
+	}
+	
+	public int getStep() {
+		return stepCount;
 	}
 	
 }

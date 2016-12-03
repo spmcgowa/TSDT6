@@ -21,7 +21,7 @@ public class Level2 extends Level {
 		output.setPreferredSize(new Dimension(200, 200));
 	}
 
-  public boolean playLevel2(Command cmd) {
+  public boolean playLevel(Command cmd) {
     String command = cmd.getCommand();
 
     if (stepCount == 0) {
@@ -82,7 +82,7 @@ public class Level2 extends Level {
     location = d;
   }
 
-  protected Directory buildLevel2(Directory root) {
+  protected Directory buildLevel(Directory root) {
     Directory lv2 = new Directory("Level2", root, new ArrayList<Directory>(), new ArrayList<File>());
 		Directory city = new Directory("City", lv2, new ArrayList<Directory>(), new ArrayList<File>());
 		lv2.addDirectory(city);
@@ -201,6 +201,14 @@ public class Level2 extends Level {
 
 
   }
+  
+  public int getStep() {
+	  return stepCount;
+  }
 
+  
+  public void devMode(int n) {
+	  stepCount = n;
+  }
 
 }

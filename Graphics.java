@@ -23,6 +23,27 @@ public class Graphics {
 	}
 	
 	public void updateGraphics(Command cmd, Directory d, int step) {
+		
+		if(level == 1) {
+			if(step >= 27 && d.name().equals("HypostyleHall")) {
+				img = new ImageIcon("resources/level1/HypostyleHallSolved.png");
+				
+			} else if(step >= 23 && d.name().equals("GrandGallery")) {
+				img = new ImageIcon("resources/level1/GrandGalleryLS.png");
+				
+			} else if(step >= 20 && d.name().equals(".PyramidOfHeket")) {
+				img = new ImageIcon("resources/level1/PyramidofHeketDoor.png");
+				
+			} else if(d.getParent().name().equals("Library")) {
+				img = new ImageIcon("resources/level1/Library.png");
+				
+			}
+		} else if(level == 2) {
+			if(d.getParent().name().equals("Library")) {
+				img = new ImageIcon("resources/level2/Library.png");
+			}
+		}
+		
 		img = new ImageIcon("resources/level" + level + "/" + d.name() + ".png");
 		
 		if(img == null) {
