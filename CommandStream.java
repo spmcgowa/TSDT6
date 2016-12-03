@@ -627,6 +627,39 @@ public class CommandStream implements ActionListener {
 		return null;
 	}
 	
+	public TerminalError ln(Command c) {
+		
+		if(c.getFlags().size() > 0 && c.getFlags().get(0).equals("-s")) {
+			
+			if(c.getInputs().size() == 2) {
+				SearchResults s = validateFilePath(c.getInputs().get(0));
+				SearchResults s2 = validateFilePath(c.getInputs().get(1));
+				
+				if(!s.endsWithFile || s2.endsWithFile) {
+					return new TerminalError("Invalid arguments");
+				}
+				
+				String[] s3 = c.getInputs().get(0).split("/");
+				String s4 = s3[s3.length-1];
+				File f = findFile(s4, s.lastFoundDir);
+				
+				if(f == null) {
+					return new TerminalError("Invalid file specified");
+				}
+				
+				s2.lastFoundDir.addFile(f);
+				
+				return null;
+				
+			} else {
+				return new TerminalError("Not enough arguments");
+			}
+			
+		} else {
+			return new TerminalError("Invalid flags!");
+		}
+	}
+	
 	//-----------------------------------------------------------
 	// Command: rm
 			// Description: removes a file or directory
