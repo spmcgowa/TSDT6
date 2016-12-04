@@ -341,9 +341,9 @@ public class Level1 extends Level {
 		}
 		return false;
 	}
-	
+
 	public int getStep() {
 		return stepCount;
 	}
-	
+
 }

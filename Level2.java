@@ -25,11 +25,11 @@ public class Level2 extends Level {
     String command = cmd.getCommand();
 
     if (stepCount == 0) {
-      output.setText("Happy Feet: Welcome back Doctor [PLAYERNAME]! Congratulations discovering Heqet's Pyramid and recovering the Frog Amulet! This will be a fine addition to the museum! [Enter]");
+      output.setText("Happy Feet: Welcome back Doctor Jones! Congratulations discovering Heqet's Pyramid and recovering the Frog Amulet! This will be a fine addition to the museum! [Enter]");
       stepCount++;
     } else if (command.equals("")) {
       if (location.name().equals("Library") && stepCount == 1) {
-        output.setText("Dr. [you]: It will be; but, there is more to this relic than that. There's something that seems... off about it. I will have to do some research into it. But first, I need to find the proper book. Something pertaining to this Frog Amulet.");
+        output.setText("Dr. Jones: It will be; but, there is more to this relic than that. There's something that seems... off about it. I will have to do some research into it. But first, I need to find the proper book. Something pertaining to this Frog Amulet.");
         stepCount++;
       } else if (stepCount == 12 && location.name().equals("Airport")) {
         return true;
@@ -61,7 +61,7 @@ public class Level2 extends Level {
         output.setText("What's with the random capital letters? They spell out something? S-N-A-K-E-I-S-L-A-N-D. Snake Island? I should look that up.");
         stepCount++;
       } else if (stepCount == 10 && location.name().equals("Travel")) {
-        output.setText("Hmm, I think we have enough information to head to our next adventure. We can head to the airport; as I suspected, there is more to the artifact than I originally thought. I'm off to Brazil to visit an island dubbed: ‘Snake Island'. [Enter]");
+        output.setText("Hmm, I think we have enough information to head to our next adventure. We can head to the airport; as I suspected, there is more to the artifact than I originally thought. I'm off to Brazil to visit an island dubbed: ‘Snake Island'.");
         stepCount++;
       }
     } else if (command.equals("cd")) {
@@ -201,12 +201,12 @@ public class Level2 extends Level {
 
 
   }
-  
+
   public int getStep() {
 	  return stepCount;
   }
 
-  
+
   public void devMode(int n) {
 	  stepCount = n;
   }
