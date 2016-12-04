@@ -1572,10 +1572,21 @@ public class CommandStream implements ActionListener {
 			
 			String dirName = comm.getInputs().get(0);
 			
-			//creating and adding the new directory to the current working directory
-			Directory newDir = new Directory(dirName, currentDirectory, new ArrayList<Directory>(), new ArrayList<File>());
-			currentDirectory.addDirectory(newDir);
+			if(dirName.contains("/")) {
+				String[] s2 = dirName.split("/");
+				SearchResults s = validateFilePath(dirName);
+				
+				if(!s.validPath) {
+					return new TerminalError("Invalid path or file specified!");
+				}
+				
+				s.lastFoundDir.addDirectory(new Directory(s2[s2.length-1], currentDirectory, new ArrayList<Directory>(), new ArrayList<File>()));
+			} else {
 			
+				//creating and adding the new directory to the current working directory
+				Directory newDir = new Directory(dirName, currentDirectory, new ArrayList<Directory>(), new ArrayList<File>());
+				currentDirectory.addDirectory(newDir);
+			}
 			return null;
 		}
 
