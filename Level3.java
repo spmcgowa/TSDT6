@@ -18,6 +18,8 @@ public class Level3 extends Level {
   Directory hill;
   Directory compartment;
   Directory cave;
+  Directory path1;
+  Directory chest;
 
   File riddle;
   File riddle2;
@@ -156,7 +158,7 @@ public class Level3 extends Level {
       } else if (stepCount == 26 && location.name().equals("TreasureChest")) {
         output.setText("Let's head back and go to the next path - we've only got one path left.");
         stepCount++;
-      } else if (stepCount == 29 && location.name().equals("PathOne") && path.getFiles().contains(stone.txt)) {
+      } else if (stepCount == 29 && location.name().equals("PathOne") && path1.getFiles().contains(stone)) {
         output.setText("Let's check out the cave.");
         path1.addDirectory(cave);
         stepCount++;
@@ -300,7 +302,7 @@ public class Level3 extends Level {
 		airport.addDirectory(egypt);
     airport.addDirectory(brazil);
     airport.addDirectory(china);
-    airport.addDirectory(russia)
+    airport.addDirectory(russia);
     brazil.addDirectory(island);
 		egypt.addDirectory(giza);
 		egypt.addDirectory(alexandria);
@@ -312,7 +314,7 @@ public class Level3 extends Level {
 
     island.addFile(riddle);
 
-    Directory path1 = new Directory("PathOne", island, new ArrayList<Directory>(), new ArrayList<File>());
+    path1 = new Directory("PathOne", island, new ArrayList<Directory>(), new ArrayList<File>());
     Directory path2 = new Directory("PathTwo", island, new ArrayList<Directory>(), new ArrayList<File>());
     Directory path3 = new Directory("PathThree", island, new ArrayList<Directory>(), new ArrayList<File>());
     Directory path4 = new Directory("PathFour", island, new ArrayList<Directory>(), new ArrayList<File>());
@@ -371,8 +373,8 @@ public class Level3 extends Level {
 
     path4Ans = new File("pathFourAns.txt", "Goat to Tree\n	Monkey to Rope\n Snake to Hole\n Sheep to Hill\n But the remaing will have to go.");
 
-    Directory chest = new Directory("TreasureChest", path4, new ArrayList<Directory>(), new ArrayList<File>());
-    path.addDirectory(chest);
+    chest = new Directory("TreasureChest", path4, new ArrayList<Directory>(), new ArrayList<File>());
+    path4.addDirectory(chest);
 
     goat = new File("goat.txt", "");
     monkey = new File("monkey.txt", "");
@@ -393,8 +395,8 @@ public class Level3 extends Level {
     chest.addFile(hippo);
     chest.addFile(serpent);
 
-    compartment = new Directory("SmallCompartment", chest, new ArrayList<Directory>(), new ArrayList<Files>());
-    stone = new File("stone.txt" "");
+    compartment = new Directory("SmallCompartment", chest, new ArrayList<Directory>(), new ArrayList<File>());
+    stone = new File("stone.txt", "");
 
     cave = new Directory("Cave", path1, new ArrayList<Directory>(), new ArrayList<File>());
     path1.addFile(door);

@@ -17,7 +17,7 @@ public class Level5 extends Level {
   public Level5(JTextPane output) {
 		this.output = output;
 		stepCount = 0;
-		caught = false;
+
 	}
 
   public boolean playLevel(Command cmd) {
@@ -50,7 +50,7 @@ public class Level5 extends Level {
         output.setText("Doctor Jones: Titan, please, I must know. It may be the only answer to these amulets! These amulets contain mystical abilities. Those who wear them are gods amongst men! We have to make sure that we know everything about them. [Enter]");
         stepCount++;
       } else if (stepCount == 10 && place.equals("China")) {
-        output.setText("Titan: Alright, fine. The original scroll is located in the RoyalLibrary here. You’ll have to find some way to get past the guards. Once inside, seek the end of the journey; that will should have to information you seek. I’ll provide you all that I can, but be careful, my friend. I don’t want to lose you; you have given too much to this world.")
+        output.setText("Titan: Alright, fine. The original scroll is located in the RoyalLibrary here. You’ll have to find some way to get past the guards. Once inside, seek the end of the journey; that will should have to information you seek. I’ll provide you all that I can, but be careful, my friend. I don’t want to lose you; you have given too much to this world.");
         stepCount++;
       } else if (stepCount == 13 && place.equals("RoyalLibrary")) {
 
@@ -90,8 +90,8 @@ public class Level5 extends Level {
 
   protected Directory buildLevel(Directory root) {
     Directory lv5 = new Directory("Level5", root, new ArrayList<Directory>(), new ArrayList<File>());
-		Directory city = new Directory("City", lv2, new ArrayList<Directory>(), new ArrayList<File>());
-		lv6.addDirectory(city);
+		Directory city = new Directory("City", lv5, new ArrayList<Directory>(), new ArrayList<File>());
+		lv5.addDirectory(city);
 
 		library = new Directory("Library", city, new ArrayList<Directory>(), new ArrayList<File>());
 		city.addDirectory(library);
@@ -208,7 +208,7 @@ public class Level5 extends Level {
 		airport.addDirectory(egypt);
     airport.addDirectory(brazil);
     airport.addDirectory(china);
-    airport.addDirectory(russia)
+    airport.addDirectory(russia);
     brazil.addDirectory(island);
 		egypt.addDirectory(giza);
 		egypt.addDirectory(alexandria);
