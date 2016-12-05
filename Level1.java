@@ -47,7 +47,7 @@ public class Level1 extends Level {
 			}
 		}
 		if(stepCount == 0) {
-			output.setText("While researching frogs in the Library, Dr. [player name] comes across directions to a previously undiscovered pyramid. The directions make mention of a previously undiscovered treasure that definitely belongs in a museum. Excited by this new information, Dr. [player name] is ready to set off on an adventure! [Enter]");
+			output.setText("While researching frogs in the Library, Dr. Jones comes across directions to a previously undiscovered pyramid. The directions make mention of a previously undiscovered treasure that definitely belongs in a museum. Excited by this new information, Dr. Jones is ready to set off on an adventure! [Enter]");
 			stepCount++;
 		} else if(command.equals("pwd")) {
 			 if (stepCount == 3 && location.name().equals("Library")) {

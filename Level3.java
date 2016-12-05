@@ -73,6 +73,7 @@ public class Level3 extends Level {
         stepCount++;
       } else if (stepCount == 16 && location.name().equals("RockTwo")) {
         output.setText("I think that the key.txt would be useful.");
+        rock3.addDirectory(box);
         stepCount++;
       }
     } else if (command.equals("ln")) {
@@ -84,7 +85,7 @@ public class Level3 extends Level {
       if (stepCount == 6 && location.name().equals("Shack") && cmd.getInputs().get(0).equals("soYouWantTo.txt")) {
         output.setText("soYouWantTo.txt contains too much text to read over. To read the last 10 lines of a text file, we can use the <b>tail [file_name]</b> command. Try using it now.");
         stepCount++;
-      } else if (stepCount == 14 && location.name().equals("SnakeIsland") && cmd.getInputs().equals("riddle2.txt")) {
+      } else if (stepCount == 14 && location.name().equals("SnakeIsland") && cmd.getInputs().get(0).equals("riddle2.txt")) {
         output.setText("You know what to do.");
         stepCount++;
       } else if (stepCount == 18 && location.name().equals("SmallBoxWithLock")) {
@@ -370,6 +371,11 @@ public class Level3 extends Level {
     Directory rock2 = new Directory("RockTwo", path3, new ArrayList<Directory>(), new ArrayList<File>());
     Directory rock3 = new Directory("RockThree", path3, new ArrayList<Directory>(), new ArrayList<File>());
     box = new Directory("SmallBoxWithLock", rock2, new ArrayList<Directory>(), new ArrayList<File>());
+
+    path3.addDirectory(rock1);
+    path3.addDirectory(rock2);
+    path3.addDirectory(rock3);
+    //rock3.addDirectory(box);
 
     path4Ans = new File("pathFourAns.txt", "Goat to Tree\n	Monkey to Rope\n Snake to Hole\n Sheep to Hill\n But the remaing will have to go.");
 

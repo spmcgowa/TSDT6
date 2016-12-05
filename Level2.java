@@ -31,8 +31,17 @@ public class Level2 extends Level {
       if (location.name().equals("Library") && stepCount == 1) {
         output.setText("Dr. Jones: It will be; but, there is more to this relic than that. There's something that seems... off about it. I will have to do some research into it. But first, I need to find the proper book. Something pertaining to this Frog Amulet.");
         stepCount++;
-      } else if (stepCount == 12 && location.name().equals("Airport")) {
+      } else if (stepCount == 16 && location.name().equals("Airport")) {
         return true;
+      } else if (stepCount == 11 && location.name().equals("Travel")) {
+        output.setText("In this text-editor, to save a file you are currently editing, you press <b>Ctrl</b> and <b>o</b>. To exit nano, you press <b>Ctrl</b> and <b>x</b>. [Enter]");
+        stepCount++;
+      } else if (stepCount == 12 && location.name().equals("Travel")) {
+        output.setText("Why don't you try creating your own <b>.txt</b> file with come information regarding Snake Island or Aesop. Try <b>nano [yourFileName.txt]</b>");
+        stepCount++;
+      } else if (stepCount == 14 && location.name().equals("Travel")) {
+        output.setText("I think we have enough information to head to our next adventure. We can head to the airport; as I suspected, there is more to the artifact than I originally thought. I'm off to Brazil to visit an island dubbed: Snake Island.");
+        stepCount++;
       }
     } else if (command.equals("ls")) {
       if (stepCount == 2 && location.name().equals("Library")) {
@@ -61,15 +70,20 @@ public class Level2 extends Level {
         output.setText("What's with the random capital letters? They spell out something? S-N-A-K-E-I-S-L-A-N-D. Snake Island? I should look that up.");
         stepCount++;
       } else if (stepCount == 10 && location.name().equals("Travel")) {
-        output.setText("Hmm, I think we have enough information to head to our next adventure. We can head to the airport; as I suspected, there is more to the artifact than I originally thought. I'm off to Brazil to visit an island dubbed: ‘Snake Island'.");
+        output.setText("Wow. We just got quite a bit of information. This is when <b>nano</b> will become useful. <b>nano</b> is an installed by default text-editor in many Linux distros. You can use it to create any kind of file, we will use it to create a <b>.txt</b> file. [Enter]");
         stepCount++;
       }
     } else if (command.equals("cd")) {
       if (stepCount == 7 && location.name().equals("Journals")) {
         output.setText("Next, we want to read it. How you ask? Use the <b>cat [filename]</b> command to read a file on the command line.");
         stepCount++;
-      } else if (stepCount == 11 && location.name().equals("Airport")) {
+      } else if (stepCount == 15 && location.name().equals("Airport")) {
         output.setText("Congratulations! You finished Level 2. Hit [Enter] to head to Level 3.");
+        stepCount++;
+      }
+    } else if (command.equals("nano")) {
+      if (stepCount == 13 && location.name().equals("Travel")) {
+        output.setText("You can create your own file using <b>nano</b> anytime and anywhere. Don't be afraid to use it! [Enter]");
         stepCount++;
       }
     }

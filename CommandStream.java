@@ -197,7 +197,7 @@ public class CommandStream implements ActionListener {
 					lv.setLocation(currentDirectory);
 					lv.devMode(0);
 					lv.playLevel(new Command());
-				} 
+				}
 			}
 
 			g.updateGraphics(command, currentDirectory, lv.getStep());
@@ -1589,34 +1589,62 @@ public class CommandStream implements ActionListener {
 		public TerminalError mkdir(Command comm) {
 
 			//checking for appropriate number of inputs
-			if(comm.getInputs().size() != 1) {
-				return new TerminalError("Exactly 1 argument required!");
-			}
-
-			String dirName = comm.getInputs().get(0);
-		/*	String parDir = "";
-			String nDir = "";
-
-			for (int i = 0; i < dirName.length(); i++) {
-				if (dirName.charAt(i) == '/') {
-					parDir = dirName.substring(0, i);
-					nDir = dirName.substring(i + 1, dirName.length());
-					System.out.println(parDir);
-					System.out.println(nDir);
+				if(comm.getInputs().size() != 1) {
+					return new TerminalError("Exactly 1 argument required!");
 				}
-			}
-			for (Directory d : currentDirectory.getSubDirs()) {
-				if (d.name().equals(parDir)) {
-					parentDir = d;
-				}
-			}
-			*/
-			//creating and adding the new directory to the current working directory
-			Directory newDir = new Directory(dirName, currentDirectory, new ArrayList<Directory>(), new ArrayList<File>());
-			currentDirectory.addDirectory(newDir);
 
-			return null;
+				String dirName = comm.getInputs().get(0);
+
+				if(dirName.contains("/")) {
+					String[] s2 = dirName.split("/");
+					SearchResults s = validateFilePath(dirName);
+
+					if(!s.validPath) {
+						return new TerminalError("Invalid path or file specified!");
+					}
+
+					s.lastFoundDir.addDirectory(new Directory(s2[s2.length-1], currentDirectory, new ArrayList<Directory>(), new ArrayList<File>()));
+				} else {
+
+					//creating and adding the new directory to the current working directory
+					Directory newDir = new Directory(dirName, currentDirectory, new ArrayList<Directory>(), new ArrayList<File>());
+					currentDirectory.addDirectory(newDir);
+				}
+				return null;
 		}
+
+		public TerminalError ln(Command c) {
+
+		if(c.getFlags().size() > 0 && c.getFlags().get(0).equals("-s")) {
+
+			if(c.getInputs().size() == 2) {
+				SearchResults s = validateFilePath(c.getInputs().get(0));
+				SearchResults s2 = validateFilePath(c.getInputs().get(1));
+
+				if(!s.endsWithFile || s2.endsWithFile) {
+					return new TerminalError("Invalid arguments");
+				}
+
+				String[] s3 = c.getInputs().get(0).split("/");
+				String s4 = s3[s3.length-1];
+				File f = findFile(s4, s.lastFoundDir);
+
+				if(f == null) {
+					return new TerminalError("Invalid file specified");
+				}
+
+				s2.lastFoundDir.addFile(f);
+
+				return null;
+
+			} else {
+				return new TerminalError("Not enough arguments");
+			}
+
+		} else {
+			return new TerminalError("Invalid flags!");
+		}
+	}
 
 		// End block of Command Methods
 		// ----------------------------------------------------------------------------------------------------------------------------------------------------
