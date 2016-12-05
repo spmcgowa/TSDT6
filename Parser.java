@@ -11,9 +11,9 @@ public class Parser {
 	public Parser() {
 		root = new Directory("root", null, new ArrayList<Directory>(), new ArrayList<File>());
 	}
-	
+
 	public static void main(String[] args) {
-		
+
 		Parser p = new Parser();
 		//Directory startingDir = p.buildLvls(p.root);
 
@@ -21,89 +21,90 @@ public class Parser {
 		final double SCREEN_Y = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
 		int x = (int)(SCREEN_X / 2);
 		int y = (int)SCREEN_Y - 70;
-		
+
 		//this is the window the UI will be housed in
 		JFrame window = new JFrame();
-		window.setResizable(false);
+		window.setResizable(true);
 
 		JPanel house = new JPanel();
 		house.setPreferredSize(new Dimension(x, y));
 		house.setLayout(new BoxLayout(house, BoxLayout.Y_AXIS));
-		
-		
+
+
 		JPanel display = new JPanel();
-			
+
 			JLabel graphics = new JLabel();
-			
+
 			graphics.setPreferredSize(new Dimension(x, (int)((y/2)*0.8)));
-			
+
 			display.add(graphics);
 			house.add(display);
-			
+
 		//JTextPane to display story-advancing dialogue
 		JPanel dialogue = new JPanel();
 		dialogue.setLayout(new BoxLayout(dialogue, BoxLayout.Y_AXIS));
 		JTextPane storyOutput = new JTextPane();
 			storyOutput.setEditable(false);
 			storyOutput.setVisible(true);
-			
+
 			JScrollPane necessaryEvil = new JScrollPane(storyOutput);
 			necessaryEvil.setPreferredSize(new Dimension(x, (int)((y/2)*0.2)));
 			//necessaryEvil.getVerticalScrollBar().setPreferredSize(new Dimension(0, 0));
-			
+
 			dialogue.add(necessaryEvil);
-			
+
 			house.add(dialogue);
-			
+
 		//terminal is the JPanel that will contain all terminal-related elements
 		JPanel terminal = new JPanel();
 			//buttons functionality for nano
 			terminal.setPreferredSize(new Dimension(x, y/2));
-		
+
 			JPanel buttons = new JPanel();
 			buttons.setLayout(new FlowLayout());
-		
+
 			JButton save = new JButton("Ctrl + O");
 			JButton exit = new JButton("Ctrl + X");
-		
+
 			save.setActionCommand("save");
 			exit.setActionCommand("exit");
-		
+
 			buttons.add(save);
 			buttons.add(exit);
-		
+
 			buttons.setVisible(false);
-			
+
 			//the input box
 			JTextField input = new JTextField();
 			input.setPreferredSize(new Dimension(x, y/20));
 			input.setFont(new Font("Courier", Font.PLAIN, 14));
 			input.setCaretColor(Color.WHITE);
 			input.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-			
+
 			//output area
 			JTextArea output = new JTextArea();
 			output.setPreferredSize(new Dimension(x, (int)(y*0.95)));
 			output.setEditable(false);
 			output.setFont(new Font("Courier", Font.PLAIN, 14));
-			
+			output.setLineWrap(true);
+
 			input.setBackground(Color.BLACK);
 			input.setForeground(Color.WHITE);
 			output.setBackground(Color.BLACK);
 			output.setForeground(Color.WHITE);
-			
+
 				JScrollPane scrollGoal = new JScrollPane(output);
 				scrollGoal.getVerticalScrollBar().setVisible(false);
 				scrollGoal.getVerticalScrollBar().setPreferredSize(new Dimension(0,0));
 				scrollGoal.setBorder(null);
-				
+
 			terminal.setLayout(new BoxLayout(terminal, BoxLayout.Y_AXIS));
 			terminal.add(input, BorderLayout.NORTH);
 			terminal.add(scrollGoal, BorderLayout.SOUTH);
 			terminal.add(buttons, BorderLayout.SOUTH);
 
 			house.add(terminal, BorderLayout.SOUTH);
-			
+
 		window.add(house);
 
 		window.pack();

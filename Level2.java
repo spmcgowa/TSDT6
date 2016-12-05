@@ -3,7 +3,7 @@ import java.util.ArrayList;
 
 import javax.swing.*;
 
-public class Level2 {
+public class Level2 extends Level {
 
   CommandStream cs;
   String dialogStep;
@@ -21,23 +21,27 @@ public class Level2 {
 		output.setPreferredSize(new Dimension(200, 200));
 	}
 
-  public int getStep() {
-    return stepCount;
-  }
-
-  public boolean playLevel2(Command cmd) {
+  public boolean playLevel(Command cmd) {
     String command = cmd.getCommand();
 
     if (stepCount == 0) {
-      output.setText("Happy Feet: Welcome back Doctor Jones! Congratulations discovering Heqet’s Pyramid and recovering the Frog Amulet! This will be a fine addition to the museum! [Enter]");
-      //stepCount++;
-      return true;
+      output.setText("Happy Feet: Welcome back Doctor Jones! Congratulations discovering Heqet's Pyramid and recovering the Frog Amulet! This will be a fine addition to the museum! [Enter]");
+      stepCount++;
     } else if (command.equals("")) {
       if (location.name().equals("Library") && stepCount == 1) {
-        output.setText("Dr. Jones: It will be; but, there is more to this relic than that. There’s something that seems… off about it. I will have to do some research into it. But first, I need to find the proper book. Something pertaining to this Frog Amulet.");
+        output.setText("Dr. Jones: It will be; but, there is more to this relic than that. There's something that seems... off about it. I will have to do some research into it. But first, I need to find the proper book. Something pertaining to this Frog Amulet.");
         stepCount++;
-      } else if (stepCount == 12 && location.name().equals("Airport")) {
+      } else if (stepCount == 16 && location.name().equals("Airport")) {
         return true;
+      } else if (stepCount == 11 && location.name().equals("Travel")) {
+        output.setText("In this text-editor, to save a file you are currently editing, you press <b>Ctrl</b> and <b>o</b>. To exit nano, you press <b>Ctrl</b> and <b>x</b>. [Enter]");
+        stepCount++;
+      } else if (stepCount == 12 && location.name().equals("Travel")) {
+        output.setText("Why don't you try creating your own <b>.txt</b> file with come information regarding Snake Island or Aesop. Try <b>nano [yourFileName.txt]</b>");
+        stepCount++;
+      } else if (stepCount == 14 && location.name().equals("Travel")) {
+        output.setText("I think we have enough information to head to our next adventure. We can head to the airport; as I suspected, there is more to the artifact than I originally thought. I'm off to Brazil to visit an island dubbed: Snake Island.");
+        stepCount++;
       }
     } else if (command.equals("ls")) {
       if (stepCount == 2 && location.name().equals("Library")) {
@@ -49,7 +53,7 @@ public class Level2 {
         output.setText("To limit your search, you can add a specific directory or path to the <b>find</b> command! Try <b>find [directory/path]</b> to search one directory and its subdirectories. ");
         stepCount++;
       } else if (stepCount == 4 && location.name().equals("Library")) {
-        output.setText("It’s possible to search for a specific file by adding the <b>-name</b> argument to the command. <b>find [directory/path] -name [filename]</b>");
+        output.setText("It's possible to search for a specific file by adding the <b>-name</b> argument to the command. <b>find [directory/path] -name [filename]</b>");
         stepCount++;
       } else if (stepCount == 5 && location.name().equals("Library") && cmd.getFlags().size() > 0) {
         output.setText("Yes there's more! You can generalize your search by replacing a part of the filename with <b>*</b> to search a wild card. <b>find [directory/path] -name *.[format/extension]</b> OR <b>find [directory/path] -name [filename].*</b>");
@@ -63,18 +67,23 @@ public class Level2 {
         output.setText("This archeologist thought that the Aesop Fable of the scorpion and the frog had something to do with this amulet. I should look around for that tale and read it.");
         stepCount++;
       } else if (stepCount == 9 && location.name().equals("Fantasy")) {
-        output.setText("What’s with the random capital letters? They spell out something? S-N-A-K-E-I-S-L-A-N-D. Snake Island? I should look that up.");
+        output.setText("What's with the random capital letters? They spell out something? S-N-A-K-E-I-S-L-A-N-D. Snake Island? I should look that up.");
         stepCount++;
       } else if (stepCount == 10 && location.name().equals("Travel")) {
-        output.setText("Hmm, I think we have enough information to head to our next adventure. We can head to the airport; as I suspected, there is more to the artifact than I originally thought. I’m off to Brazil to visit an island dubbed: ‘Snake Island’. [Enter]");
+        output.setText("Wow. We just got quite a bit of information. This is when <b>nano</b> will become useful. <b>nano</b> is an installed by default text-editor in many Linux distros. You can use it to create any kind of file, we will use it to create a <b>.txt</b> file. [Enter]");
         stepCount++;
       }
     } else if (command.equals("cd")) {
       if (stepCount == 7 && location.name().equals("Journals")) {
         output.setText("Next, we want to read it. How you ask? Use the <b>cat [filename]</b> command to read a file on the command line.");
         stepCount++;
-      } else if (stepCount == 11 && location.name().equals("Airport")) {
+      } else if (stepCount == 15 && location.name().equals("Airport")) {
         output.setText("Congratulations! You finished Level 2. Hit [Enter] to head to Level 3.");
+        stepCount++;
+      }
+    } else if (command.equals("nano")) {
+      if (stepCount == 13 && location.name().equals("Travel")) {
+        output.setText("You can create your own file using <b>nano</b> anytime and anywhere. Don't be afraid to use it! [Enter]");
         stepCount++;
       }
     }
@@ -87,7 +96,7 @@ public class Level2 {
     location = d;
   }
 
-  protected Directory buildLevel2(Directory root) {
+  protected Directory buildLevel(Directory root) {
     Directory lv2 = new Directory("Level2", root, new ArrayList<Directory>(), new ArrayList<File>());
 		Directory city = new Directory("City", lv2, new ArrayList<Directory>(), new ArrayList<File>());
 		lv2.addDirectory(city);
@@ -183,14 +192,14 @@ public class Level2 {
     academia.addDirectory(diaries);
 
 
-    File frog = new File("frog.txt", "August 14th, 1734\nSince my discovery of the fact that there is another hidden pyramid, I petitioned for an archeological dig in the area. The committee denied my request- the nerve! I have resorted to asking the locals about the Heqet’s Pyramid. Most had no clue what I was asking about, but a few retorted a legend of the pyramid. The legend goes that the great snake Apep, the god of chaos and darkness, bit Heqet and poisoned her. Heqet called on the aid of Serket, the goddess of scorpions and healing venomous bites. Serket removed snake’s venom from Heqet and stored it in one of Heqet’s amulets. The amulet was then given to the pharaoh for protection from Apep. In recognition of her gift, the pharaoh built a pyramid for Heqet and stored the amulet there for safety. All this talk of frogs, snakes, and scorpions reminds me of a Aesop tale! I wonder if there is some ancient connection between the fables and the Egyptian mythology.\n\nApril 7th, 1749\nFrom looking deeper into Aesop tale of the scorpion and the frog, I believe I have found the location to unearth another amulet.");
+    File frog = new File("frog.txt", "August 14th, 1734\n  Since my discovery of the fact that there is another hidden pyramid, I petitioned for an archeological dig in the area. The committee denied my request- the nerve! I have resorted to asking the locals about the Heqet's Pyramid. Most had no clue what I was asking about, but a few retorted a legend of the pyramid. The legend goes that the great snake Apep, the god of chaos and darkness, bit Heqet and poisoned her. Heqet called on the aid of Serket, the goddess of scorpions and healing venomous bites. Serket removed snake's venom from Heqet and stored it in one of Heqet's amulets. The amulet was then given to the pharaoh for protection from Apep. In recognition of her gift, the pharaoh built a pyramid for Heqet and stored the amulet there for safety. All this talk of frogs, snakes, and scorpions reminds me of a Aesop tale! I wonder if there is some ancient connection between the fables and the Egyptian mythology.\n\nApril 7th, 1749\n  From looking deeper into Aesop tale of the scorpion and the frog, I believe I have found the location to unearth another amulet.");
     //File frog = new File("FrogAmulet.txt", "");
     journals.addFile(frog);
 
     File aesop1 = new File("aesopAndrocles.txt", "");
     File aesop2 = new File("aesopEagleArrow.txt", "");
     File aesop3 = new File("aesopKidWolf.txt", "");
-    File aesop = new File("aesopScorpionFrog.txt", "a ScorpioN and A frog meet on the banK of a strEam and the scorpion asks the frog to carry him across on its back. the frog asks, 'how do I know you won't sting me?' the scorpion says, 'because if I do, I will die too.' \n the frog is satisfied, and they set out, but in midstream, the scorpion stIngs the frog. the frog feels the onSet of paraLysis and stArts to sink, kNowing they both will Drown, but has just enough time to gasp 'why?'\nreplies the scorpion: 'its my nature...'");
+    File aesop = new File("aesopScorpionFrog.txt", "a ScorpioN and A frog meet on the banK of a strEam and the scorpion asks the frog to carry him across on its back. the frog asks, 'how do I know you won't sting me?' the scorpion says, 'because if I do, I will die too.'\n \n the frog is satisfied, and they set out, but in midstream, the scorpion stIngs the frog. the frog feels the onSet of paraLysis and stArts to sink, kNowing they both will Drown, but has just enough time to gasp 'why?'\n \n replies the scorpion: 'its my nature...'");
     File aesop4 = new File("aesopYoungTheifMother.txt", "");
 
     fantasy.addFile(aesop1);
@@ -199,7 +208,7 @@ public class Level2 {
     fantasy.addFile(aesop4);
     fantasy.addFile(aesop);
 
-    File snake = new File("snakeIsland.txt", "Island in Brazil that is home to the World’s deadliest snakes. For a long time, the snakes did not mind anyone visiting the island. Around 1736, the Island was closed to the public due to a severe increase in casualties from snake venom. Scientists suspect that something is agitating the snakes, but with no sure way of preventing their venom, traveling there is out of the question.");
+    File snake = new File("snakeIsland.txt", "Island in Brazil that is home to the World's deadliest snakes. For a long time, the snakes did not mind anyone visiting the island. Around 1736, the Island was closed to the public due to a severe increase in casualties from snake venom. Scientists suspect that something is agitating the snakes, but with no sure way of preventing their venom, traveling there is out of the question.");
     travel.addFile(snake);
 
     return library;
@@ -207,5 +216,13 @@ public class Level2 {
 
   }
 
+  public int getStep() {
+	  return stepCount;
+  }
+
+
+  public void devMode(int n) {
+	  stepCount = n;
+  }
 
 }
